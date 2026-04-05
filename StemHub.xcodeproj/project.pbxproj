@@ -6,14 +6,183 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		C574AD072F822FD300FBA2E7 /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = C574AD062F822FD300FBA2E7 /* GoogleSignIn */; };
+		C574AD092F822FD300FBA2E7 /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = C574AD082F822FD300FBA2E7 /* GoogleSignInSwift */; };
+		C574AD0D2F82301B00FBA2E7 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = C574AD0C2F82301B00FBA2E7 /* FirebaseAuth */; };
+		C574AD0F2F82302100FBA2E7 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = C574AD0E2F82302100FBA2E7 /* FirebaseFirestore */; };
+		C574AD112F82302800FBA2E7 /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = C574AD102F82302800FBA2E7 /* FirebaseCore */; };
+		C574AD6B2F82310900FBA2E7 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = C574AD6A2F82310900FBA2E7 /* FirebaseFirestore */; };
+		C574AD6D2F82311000FBA2E7 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = C574AD6C2F82311000FBA2E7 /* FirebaseAuth */; };
+		C574AD6F2F82311500FBA2E7 /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = C574AD6E2F82311500FBA2E7 /* FirebaseCore */; };
+		C574AD712F82311A00FBA2E7 /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = C574AD702F82311A00FBA2E7 /* GoogleSignIn */; };
+		C574AD732F8233F900FBA2E7 /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = C574AD722F8233F900FBA2E7 /* FirebaseStorage */; };
+		C574AD752F8234B800FBA2E7 /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = C574AD742F8234B800FBA2E7 /* FirebaseStorage */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		C574A87E2F81CF7F00FBA2E7 /* StemHub.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = StemHub.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		C574A9382F81CFB500FBA2E7 /* StemHub.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = StemHub.xcodeproj; sourceTree = "<group>"; };
+		C574AD162F82308F00FBA2E7 /* StemHub(macOS).app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "StemHub(macOS).app"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		C51BD6FB2F8257AA00C7E108 /* Exceptions for "StemHub(macOS)" folder in "StemHub(macOS)" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				View/TabBar/EnteryViewMacOS.swift,
+				View/TabBar/MainAppShellView.swift,
+				View/TabBar/StemHub_macOS_App.swift,
+				View/WorkSpace/DiffChangeRow.swift,
+				View/WorkSpace/DiffPreviewView.swift,
+				View/WorkSpace/EmptyStateView.swift,
+				View/WorkSpace/FileRowView.swift,
+				View/WorkSpace/NewProjectCard.swift,
+				View/WorkSpace/NewProjectSheetView.swift,
+				View/WorkSpace/ProjectCard.swift,
+				View/WorkSpace/ProjectCardView.swift,
+				View/WorkSpace/ProjectDetailView.swift,
+				View/WorkSpace/SettingsView.swift,
+				View/WorkSpace/VersionRowView.swift,
+				View/WorkSpace/WorkspaceView.swift,
+				ViewModels/AuthorizationViewModel.swift,
+				ViewModels/ProjectDetailViewModel.swift,
+			);
+			target = C574AD152F82308F00FBA2E7 /* StemHub(macOS) */;
+		};
+		C51BD7372F8258F800C7E108 /* Exceptions for "StemHub(macOS)" folder in "StemHub" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				View/TabBar/EnteryViewMacOS.swift,
+				View/TabBar/MainAppShellView.swift,
+				View/TabBar/StemHub_macOS_App.swift,
+				View/WorkSpace/DiffChangeRow.swift,
+				View/WorkSpace/DiffPreviewView.swift,
+				View/WorkSpace/EmptyStateView.swift,
+				View/WorkSpace/FileRowView.swift,
+				View/WorkSpace/NewProjectCard.swift,
+				View/WorkSpace/NewProjectSheetView.swift,
+				View/WorkSpace/ProjectCard.swift,
+				View/WorkSpace/ProjectCardView.swift,
+				View/WorkSpace/ProjectDetailView.swift,
+				View/WorkSpace/SettingsView.swift,
+				View/WorkSpace/VersionRowView.swift,
+				View/WorkSpace/WorkspaceView.swift,
+				ViewModels/AuthorizationViewModel.swift,
+				ViewModels/ProjectDetailViewModel.swift,
+			);
+			target = C574A87D2F81CF7F00FBA2E7 /* StemHub */;
+		};
+		C51BD8A02F82630B00C7E108 /* Exceptions for "StemHub" folder in "StemHub" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+				Shared/Resources/Extentions/View_iOS.swift,
+				"Shared/Resources/GoogleService-Info-macOS.plist",
+			);
+			target = C574A87D2F81CF7F00FBA2E7 /* StemHub */;
+		};
+		C574AD782F8234D400FBA2E7 /* Exceptions for "StemHub" folder in "StemHub(macOS)" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Shared/LaunchScreen/Models/AlertItem.swift,
+				Shared/LaunchScreen/Models/Field.swift,
+				Shared/LaunchScreen/Models/LaunchRoute.swift,
+				Shared/LaunchScreen/Models/ResetPasswordError.swift,
+				Shared/LaunchScreen/Models/User.swift,
+				Shared/LaunchScreen/Service/Auth/GoogleAuthService.swift,
+				"Shared/LaunchScreen/Service/Strategies/Protocols /AuthStateStrategy.swift",
+				"Shared/LaunchScreen/Service/Strategies/Protocols /UserCreationStrategy.swift",
+				"Shared/LaunchScreen/Service/Strategies/Protocols /UserFetchStrategy.swift",
+				"Shared/LaunchScreen/Service/Strategies/Protocols /UserSaveStrategy.swift",
+				Shared/LaunchScreen/Service/Strategies/Strategies/DefaultAuthStateStrategy.swift,
+				Shared/LaunchScreen/Service/Strategies/Strategies/DefaultUserCreationStrategy.swift,
+				Shared/LaunchScreen/Service/Strategies/Strategies/FirestoreFetchStrategy.swift,
+				Shared/LaunchScreen/Service/Strategies/Strategies/FirestoreSaveStrategy.swift,
+				Shared/LaunchScreen/Service/Strategies/Strategies/UserAuthOrchestrator.swift,
+				Shared/LaunchScreen/ViewModel/AuthViewModel.swift,
+				Shared/LaunchScreen/ViewModel/SocialLoginViewModel.swift,
+				Shared/LaunchScreen/ViewModel/TermsAndPrivacyLabelViewModel.swift,
+				"Shared/LaunchScreen/Views/Launch /LaunchView.swift",
+				"Shared/LaunchScreen/Views/Launch /Login/LoginScreen.swift",
+				"Shared/LaunchScreen/Views/Launch /Login/ResetPasswrdScreen.swift",
+				"Shared/LaunchScreen/Views/Launch /SignUp/SignUpScreen.swift",
+				"Shared/LaunchScreen/Views/Launch /Welcome/SocialLoginSubView.swift",
+				"Shared/LaunchScreen/Views/Launch /Welcome/TermsAndPrivacyLabel.swift",
+				"Shared/LaunchScreen/Views/Launch /Welcome/WelcomeScreen.swift",
+				Shared/Resources/Assets.xcassets,
+				Shared/Resources/Constants/AppURLs.swift,
+				Shared/Resources/Constants/UserDefaultsManager.swift,
+				Shared/Resources/Extentions/AuthDataResult.swift,
+				Shared/Resources/Extentions/FileManager.swift,
+				Shared/Resources/Extentions/View_iOS.swift,
+				Shared/Resources/Extentions/View.swift,
+				"Shared/Resources/GoogleService-Info-macOS.plist",
+				Shared/Resources/Loading/LoadingOverlayModifier.swift,
+				Shared/Resources/Loading/LoadingView.swift,
+				Shared/Resources/Utils/Fonts.swift,
+				Shared/Resources/Views/GradientTextField.swift,
+				Shared/Resources/Views/KeyboardAdaptive.swift,
+				Shared/WorkSpaceScreen/MainScreen/Models/Band.swift,
+				Shared/WorkSpaceScreen/MainScreen/Models/Branch.swift,
+				Shared/WorkSpaceScreen/MainScreen/Models/Comment.swift,
+				Shared/WorkSpaceScreen/MainScreen/Models/Commit.swift,
+				Shared/WorkSpaceScreen/MainScreen/Models/CommitFileSnapshot.swift,
+				Shared/WorkSpaceScreen/MainScreen/Models/CommitStatus.swift,
+				Shared/WorkSpaceScreen/MainScreen/Models/DiffResult.swift,
+				Shared/WorkSpaceScreen/MainScreen/Models/FileBlob.swift,
+				Shared/WorkSpaceScreen/MainScreen/Models/FileCapabilities.swift,
+				Shared/WorkSpaceScreen/MainScreen/Models/FileDiff.swift,
+				Shared/WorkSpaceScreen/MainScreen/Models/FileVersion.swift,
+				Shared/WorkSpaceScreen/MainScreen/Models/LocalFile.swift,
+				Shared/WorkSpaceScreen/MainScreen/Models/LocalProjectState.swift,
+				Shared/WorkSpaceScreen/MainScreen/Models/MusicFile.swift,
+				Shared/WorkSpaceScreen/MainScreen/Models/Project.swift,
+				Shared/WorkSpaceScreen/MainScreen/Models/ProjectDiff.swift,
+				Shared/WorkSpaceScreen/MainScreen/Models/ProjectVersion.swift,
+				Shared/WorkSpaceScreen/MainScreen/Models/RemoteFileSnapshot.swift,
+				Shared/WorkSpaceScreen/MainScreen/Models/SyncStatus.swift,
+				Shared/WorkSpaceScreen/MainScreen/Service/FirestoreManager.swift,
+				Shared/WorkSpaceScreen/MainScreen/Service/Protocols/CommitStorageStrategy.swift,
+				Shared/WorkSpaceScreen/MainScreen/Service/Protocols/DiffCalculationStrategy.swift,
+				Shared/WorkSpaceScreen/MainScreen/Service/Protocols/FileScanStrategy.swift,
+				Shared/WorkSpaceScreen/MainScreen/Service/Protocols/FileUploadStrategy.swift,
+				Shared/WorkSpaceScreen/MainScreen/Service/Protocols/RemoteFetchStrategy.swift,
+				Shared/WorkSpaceScreen/MainScreen/Service/Strategies/FirebaseStorageUpload.swift,
+				Shared/WorkSpaceScreen/MainScreen/Service/Strategies/FirestoreCommitStorage.swift,
+				Shared/WorkSpaceScreen/MainScreen/Service/Strategies/FirestoreRemoteFetch.swift,
+				Shared/WorkSpaceScreen/MainScreen/Service/Strategies/LocalFileScanner.swift,
+				Shared/WorkSpaceScreen/MainScreen/Service/Strategies/StandardDiffEngine.swift,
+				Shared/WorkSpaceScreen/MainScreen/Service/Sync/SyncOrchestrator.swift,
+				Shared/WorkSpaceScreen/MainScreen/ViewModel/ProjectViewModel.swift,
+				Shared/WorkSpaceScreen/MainScreen/ViewModel/WorkspaceViewModel.swift,
+			);
+			target = C574AD152F82308F00FBA2E7 /* StemHub(macOS) */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		C574A8802F81CF7F00FBA2E7 /* StemHub */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				C51BD8A02F82630B00C7E108 /* Exceptions for "StemHub" folder in "StemHub" target */,
+				C574AD782F8234D400FBA2E7 /* Exceptions for "StemHub" folder in "StemHub(macOS)" target */,
+			);
 			path = StemHub;
+			sourceTree = "<group>";
+		};
+		C574ACFF2F822FBB00FBA2E7 /* StemHub(iOS) */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = "StemHub(iOS)";
+			sourceTree = "<group>";
+		};
+		C574AD792F82374000FBA2E7 /* StemHub(macOS) */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				C51BD7372F8258F800C7E108 /* Exceptions for "StemHub(macOS)" folder in "StemHub" target */,
+				C51BD6FB2F8257AA00C7E108 /* Exceptions for "StemHub(macOS)" folder in "StemHub(macOS)" target */,
+			);
+			path = "StemHub(macOS)";
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -23,6 +192,24 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C574AD072F822FD300FBA2E7 /* GoogleSignIn in Frameworks */,
+				C574AD112F82302800FBA2E7 /* FirebaseCore in Frameworks */,
+				C574AD0F2F82302100FBA2E7 /* FirebaseFirestore in Frameworks */,
+				C574AD0D2F82301B00FBA2E7 /* FirebaseAuth in Frameworks */,
+				C574AD092F822FD300FBA2E7 /* GoogleSignInSwift in Frameworks */,
+				C574AD752F8234B800FBA2E7 /* FirebaseStorage in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C574AD132F82308F00FBA2E7 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C574AD6B2F82310900FBA2E7 /* FirebaseFirestore in Frameworks */,
+				C574AD712F82311A00FBA2E7 /* GoogleSignIn in Frameworks */,
+				C574AD6F2F82311500FBA2E7 /* FirebaseCore in Frameworks */,
+				C574AD732F8233F900FBA2E7 /* FirebaseStorage in Frameworks */,
+				C574AD6D2F82311000FBA2E7 /* FirebaseAuth in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -33,6 +220,8 @@
 			isa = PBXGroup;
 			children = (
 				C574A8802F81CF7F00FBA2E7 /* StemHub */,
+				C574AD792F82374000FBA2E7 /* StemHub(macOS) */,
+				C574ACFF2F822FBB00FBA2E7 /* StemHub(iOS) */,
 				C574A87F2F81CF7F00FBA2E7 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -41,7 +230,13 @@
 			isa = PBXGroup;
 			children = (
 				C574A87E2F81CF7F00FBA2E7 /* StemHub.app */,
+				C574AD162F82308F00FBA2E7 /* StemHub(macOS).app */,
 			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		C574A93A2F81CFB500FBA2E7 /* Products */ = {
+			isa = PBXGroup;
 			name = Products;
 			sourceTree = "<group>";
 		};
@@ -62,12 +257,44 @@
 			);
 			fileSystemSynchronizedGroups = (
 				C574A8802F81CF7F00FBA2E7 /* StemHub */,
+				C574ACFF2F822FBB00FBA2E7 /* StemHub(iOS) */,
+				C574AD792F82374000FBA2E7 /* StemHub(macOS) */,
 			);
 			name = StemHub;
 			packageProductDependencies = (
+				C574AD062F822FD300FBA2E7 /* GoogleSignIn */,
+				C574AD082F822FD300FBA2E7 /* GoogleSignInSwift */,
+				C574AD0C2F82301B00FBA2E7 /* FirebaseAuth */,
+				C574AD0E2F82302100FBA2E7 /* FirebaseFirestore */,
+				C574AD102F82302800FBA2E7 /* FirebaseCore */,
+				C574AD742F8234B800FBA2E7 /* FirebaseStorage */,
 			);
 			productName = StemHub;
 			productReference = C574A87E2F81CF7F00FBA2E7 /* StemHub.app */;
+			productType = "com.apple.product-type.application";
+		};
+		C574AD152F82308F00FBA2E7 /* StemHub(macOS) */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C574AD1E2F82309000FBA2E7 /* Build configuration list for PBXNativeTarget "StemHub(macOS)" */;
+			buildPhases = (
+				C574AD122F82308F00FBA2E7 /* Sources */,
+				C574AD132F82308F00FBA2E7 /* Frameworks */,
+				C574AD142F82308F00FBA2E7 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "StemHub(macOS)";
+			packageProductDependencies = (
+				C574AD6A2F82310900FBA2E7 /* FirebaseFirestore */,
+				C574AD6C2F82311000FBA2E7 /* FirebaseAuth */,
+				C574AD6E2F82311500FBA2E7 /* FirebaseCore */,
+				C574AD702F82311A00FBA2E7 /* GoogleSignIn */,
+				C574AD722F8233F900FBA2E7 /* FirebaseStorage */,
+			);
+			productName = "StemHub(macOS)";
+			productReference = C574AD162F82308F00FBA2E7 /* StemHub(macOS).app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -83,6 +310,9 @@
 					C574A87D2F81CF7F00FBA2E7 = {
 						CreatedOnToolsVersion = 26.4;
 					};
+					C574AD152F82308F00FBA2E7 = {
+						CreatedOnToolsVersion = 26.4;
+					};
 				};
 			};
 			buildConfigurationList = C574A8792F81CF7F00FBA2E7 /* Build configuration list for PBXProject "StemHub" */;
@@ -94,12 +324,23 @@
 			);
 			mainGroup = C574A8752F81CF7F00FBA2E7;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				C574AD052F822FD300FBA2E7 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
+				C574AD0A2F82300500FBA2E7 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = C574A87F2F81CF7F00FBA2E7 /* Products */;
 			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = C574A93A2F81CFB500FBA2E7 /* Products */;
+					ProjectRef = C574A9382F81CFB500FBA2E7 /* StemHub.xcodeproj */;
+				},
+			);
 			projectRoot = "";
 			targets = (
 				C574A87D2F81CF7F00FBA2E7 /* StemHub */,
+				C574AD152F82308F00FBA2E7 /* StemHub(macOS) */,
 			);
 		};
 /* End PBXProject section */
@@ -112,10 +353,24 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		C574AD142F82308F00FBA2E7 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		C574A87A2F81CF7F00FBA2E7 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C574AD122F82308F00FBA2E7 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -254,6 +509,7 @@
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = StemHub/Info.plist;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -264,23 +520,24 @@
 				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphonesimulator*]" = UIStatusBarStyleDefault;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 26.4;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 26.4;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.stemhub.StemHub.StemHub;
+				PRODUCT_BUNDLE_IDENTIFIER = "comStemHub.StemHub-iOS";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
 				SDKROOT = auto;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2,7";
+				TARGETED_DEVICE_FAMILY = 1;
 				XROS_DEPLOYMENT_TARGET = 26.4;
 			};
 			name = Debug;
@@ -298,6 +555,7 @@
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = StemHub/Info.plist;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -308,24 +566,119 @@
 				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphonesimulator*]" = UIStatusBarStyleDefault;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 26.4;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 26.4;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.stemhub.StemHub.StemHub;
+				PRODUCT_BUNDLE_IDENTIFIER = "comStemHub.StemHub-iOS";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
 				SDKROOT = auto;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2,7";
+				TARGETED_DEVICE_FAMILY = 1;
 				XROS_DEPLOYMENT_TARGET = 26.4;
+			};
+			name = Release;
+		};
+		C574AD1F2F82309000FBA2E7 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "StemHub(macOS)/StemHub(macOS).entitlements";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = PS354VCTKY;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_INCOMING_NETWORK_CONNECTIONS = YES;
+				ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES;
+				ENABLE_PREVIEWS = YES;
+				ENABLE_RESOURCE_ACCESS_AUDIO_INPUT = NO;
+				ENABLE_RESOURCE_ACCESS_BLUETOOTH = NO;
+				ENABLE_RESOURCE_ACCESS_CALENDARS = NO;
+				ENABLE_RESOURCE_ACCESS_CAMERA = NO;
+				ENABLE_RESOURCE_ACCESS_CONTACTS = NO;
+				ENABLE_RESOURCE_ACCESS_LOCATION = NO;
+				ENABLE_RESOURCE_ACCESS_PRINTING = NO;
+				ENABLE_RESOURCE_ACCESS_USB = NO;
+				ENABLE_USER_SELECTED_FILES = readonly;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "StemHub-macOS--Info.plist";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 15.6;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.stemhub.StemHub.macOS;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				REGISTER_APP_GROUPS = YES;
+				SDKROOT = macosx;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		C574AD202F82309000FBA2E7 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "StemHub(macOS)/StemHub(macOS).entitlements";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = PS354VCTKY;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_INCOMING_NETWORK_CONNECTIONS = YES;
+				ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES;
+				ENABLE_PREVIEWS = YES;
+				ENABLE_RESOURCE_ACCESS_AUDIO_INPUT = NO;
+				ENABLE_RESOURCE_ACCESS_BLUETOOTH = NO;
+				ENABLE_RESOURCE_ACCESS_CALENDARS = NO;
+				ENABLE_RESOURCE_ACCESS_CAMERA = NO;
+				ENABLE_RESOURCE_ACCESS_CONTACTS = NO;
+				ENABLE_RESOURCE_ACCESS_LOCATION = NO;
+				ENABLE_RESOURCE_ACCESS_PRINTING = NO;
+				ENABLE_RESOURCE_ACCESS_USB = NO;
+				ENABLE_USER_SELECTED_FILES = readonly;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "StemHub-macOS--Info.plist";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 15.6;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.stemhub.StemHub.macOS;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				REGISTER_APP_GROUPS = YES;
+				SDKROOT = macosx;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
 		};
@@ -350,7 +703,93 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
+		C574AD1E2F82309000FBA2E7 /* Build configuration list for PBXNativeTarget "StemHub(macOS)" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C574AD1F2F82309000FBA2E7 /* Debug */,
+				C574AD202F82309000FBA2E7 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		C574AD052F822FD300FBA2E7 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/google/GoogleSignIn-iOS";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 9.1.0;
+			};
+		};
+		C574AD0A2F82300500FBA2E7 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 12.11.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		C574AD062F822FD300FBA2E7 /* GoogleSignIn */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C574AD052F822FD300FBA2E7 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
+			productName = GoogleSignIn;
+		};
+		C574AD082F822FD300FBA2E7 /* GoogleSignInSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C574AD052F822FD300FBA2E7 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
+			productName = GoogleSignInSwift;
+		};
+		C574AD0C2F82301B00FBA2E7 /* FirebaseAuth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C574AD0A2F82300500FBA2E7 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAuth;
+		};
+		C574AD0E2F82302100FBA2E7 /* FirebaseFirestore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C574AD0A2F82300500FBA2E7 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFirestore;
+		};
+		C574AD102F82302800FBA2E7 /* FirebaseCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C574AD0A2F82300500FBA2E7 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseCore;
+		};
+		C574AD6A2F82310900FBA2E7 /* FirebaseFirestore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C574AD0A2F82300500FBA2E7 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFirestore;
+		};
+		C574AD6C2F82311000FBA2E7 /* FirebaseAuth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C574AD0A2F82300500FBA2E7 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAuth;
+		};
+		C574AD6E2F82311500FBA2E7 /* FirebaseCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C574AD0A2F82300500FBA2E7 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseCore;
+		};
+		C574AD702F82311A00FBA2E7 /* GoogleSignIn */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C574AD052F822FD300FBA2E7 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
+			productName = GoogleSignIn;
+		};
+		C574AD722F8233F900FBA2E7 /* FirebaseStorage */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C574AD0A2F82300500FBA2E7 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseStorage;
+		};
+		C574AD742F8234B800FBA2E7 /* FirebaseStorage */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C574AD0A2F82300500FBA2E7 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseStorage;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = C574A8762F81CF7F00FBA2E7 /* Project object */;
 }

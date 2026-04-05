@@ -10,6 +10,11 @@ import SwiftUI
 
 struct WorkSpaceView: View {
     var body: some View {
-        Text("WorkSpaceView")
+        Button {
+            GoogleAuthService.shared.logout()
+        } label: {
+           Text( "Logout")
+        }
+
     }
 }

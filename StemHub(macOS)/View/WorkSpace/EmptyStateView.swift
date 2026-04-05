@@ -1,8 +1,31 @@
 //
 //  EmptyStateView.swift
-//  StemHub(macOS)
+//  StemHub
 //
-//  Created by Marwa Awad on 05.04.2026.
+//  Created by Marwa Awad on 02.04.2026.
 //
 
 import Foundation
+import SwiftUI
+
+
+struct EmptyStateView: View {
+    var body: some View {
+        VStack(spacing: 20) {
+            Image(systemName: "music.note.list")
+                .font(.system(size: 60))
+                .foregroundColor(.gray)
+            
+            Text("No Projects Yet")
+                .font(.title2)
+                .fontWeight(.semibold)
+                .foregroundColor(.gray)
+            
+            Text("Create your first project to get started")
+                .font(.caption)
+                .foregroundColor(.gray)
+        }
+        .frame(maxWidth: .infinity)
+        .padding()
+    }
+}
