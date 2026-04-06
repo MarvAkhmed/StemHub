@@ -109,9 +109,13 @@ final class SyncOrchestrator {
             let blob = try blobDoc.data(as: FileBlob.self)
             blobs[fileVersion.blobID] = blob
         }
-        
+        print("🔍 Diff files to apply:")
         for diff in projectVersion.diff.files {
+            print("   \(diff.changeType): \(diff.path)")
             let filePath = localRootURL.appendingPathComponent(diff.path)
+            print("🗑️ PULL REMOVED: \(filePath.path)")
+            
+       
             switch diff.changeType {
             case .added, .modified:
                 guard let newHash = diff.newHash, let blob = blobs[newHash] else { continue }
@@ -122,7 +126,10 @@ final class SyncOrchestrator {
                 
             case .removed:
                 if FileManager.default.fileExists(atPath: filePath.path) {
-                    try FileManager.default.removeItem(at: filePath)
+                    print("🗑️ ACTUALLY DELETING FILE: \(filePath.path)")
+                    if FileManager.default.fileExists(atPath: filePath.path) {
+                        try FileManager.default.removeItem(at: filePath)
+                    }
                 }
                 
             case .renamed:

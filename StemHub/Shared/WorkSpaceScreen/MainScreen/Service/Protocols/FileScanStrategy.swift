@@ -9,4 +9,5 @@ import Foundation
 
 protocol FileScanStrategy {
     func scan(folderURL: URL) throws -> [LocalFile]
+    func makeLocalFile(from url: URL) -> LocalFile
 }

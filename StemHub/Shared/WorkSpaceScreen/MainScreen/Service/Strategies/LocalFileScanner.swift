@@ -40,7 +40,20 @@ struct LocalFileScanner: FileScanStrategy {
         return files
     }
     
-    private static func hashFile(at url: URL) -> String {
+    func makeLocalFile(from url: URL) -> LocalFile {
+        let hash = Self.hashFile(at: url)
+        let size = (try? FileManager.default.attributesOfItem(atPath: url.path)[.size] as? Int64) ?? 0
+        return LocalFile(
+            path: url.lastPathComponent,
+            name: url.lastPathComponent,
+            fileExtension: url.pathExtension,
+            size: size,
+            hash: hash,
+            isDirectory: false
+        )
+    }
+    
+    static func hashFile(at url: URL) -> String {
         guard let data = try? Data(contentsOf: url) else { return "" }
         let hash = SHA256.hash(data: data)
         return hash.map { String(format: "%02x", $0) }.joined()

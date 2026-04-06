@@ -19,23 +19,14 @@ struct FirestoreCommitStorage: CommitStorageStrategy {
     
     func saveCommit(_ commit: Commit, localRootURL: URL, branchID: String) async throws -> ProjectVersion {
         var fileVersionIDs: [String] = []
-        
+          
         for fileSnapshot in commit.fileSnapshot {
             if fileSnapshot.path.hasSuffix("/") { continue }
             
-            let fileURL = localRootURL.appendingPathComponent(fileSnapshot.path)
             let blobID = fileSnapshot.hash
             
-            let blobRef = db.collection("blobs").document(blobID)
-            let blobDoc = try await blobRef.getDocument()
-            
-            if !blobDoc.exists {
-                let storagePath = try await uploadStrategy.uploadFile(localURL: fileURL, blobID: blobID)
-                let size = (try? FileManager.default.attributesOfItem(atPath: fileURL.path)[.size] as? Int64) ?? 0
-                let fileBlob = FileBlob(id: blobID, storagePath: storagePath, size: size, hash: fileSnapshot.hash, createdAt: Date())
-                try blobRef.setData(from: fileBlob)
-            }
-            
+            // ✅ Assume the blob already exists in Firestore and Storage
+            // Just create the fileVersion
             let fileVersion = FileVersion(
                 id: UUID().uuidString,
                 fileID: fileSnapshot.fileID,
@@ -48,6 +39,7 @@ struct FirestoreCommitStorage: CommitStorageStrategy {
             try db.collection("fileVersions").document(fileVersion.id).setData(from: fileVersion)
             fileVersionIDs.append(fileVersion.id)
         }
+        
         
         let branchDoc = try await db.collection("branches").document(branchID).getDocument()
         guard let branch = try? branchDoc.data(as: Branch.self) else {

@@ -38,29 +38,54 @@
 				WorkSpace/AddProject/Service/FilePickerService.swift,
 				WorkSpace/AddProject/View/NewProjectSheetView.swift,
 				WorkSpace/AddProject/ViewModel/NewProjectSheetViewModel.swift,
-				WorkSpace/DetailedWorkSpace/DiffChangeRow.swift,
-				WorkSpace/DetailedWorkSpace/DiffPreviewView.swift,
-				WorkSpace/DetailedWorkSpace/FileRowView.swift,
-				WorkSpace/DetailedWorkSpace/ProjectDetailView.swift,
 				WorkSpace/DetailedWorkSpace/Service/DefaultFileScannerStrategy.swift,
 				WorkSpace/DetailedWorkSpace/Service/FileScannerStrategy.swift,
-				WorkSpace/DetailedWorkSpace/VersionRowView.swift,
 				WorkSpace/DetailedWorkSpace/ViewModels/ProjectDetailViewModel.swift,
+				WorkSpace/DetailedWorkSpace/Views/AudioPlayerView.swift,
+				WorkSpace/DetailedWorkSpace/Views/DiffChangeRow.swift,
+				WorkSpace/DetailedWorkSpace/Views/DiffPreviewView.swift,
+				WorkSpace/DetailedWorkSpace/Views/FileRowView.swift,
+				WorkSpace/DetailedWorkSpace/Views/FileTreePlayerNodeView.swift,
+				WorkSpace/DetailedWorkSpace/Views/FileTreeView.swift,
+				WorkSpace/DetailedWorkSpace/Views/ProjectDetailView.swift,
+				WorkSpace/DetailedWorkSpace/Views/VersionRowView.swift,
+				WorkSpace/MainScreen/ViewModels/ProjectCardViewModel.swift,
+				WorkSpace/MainScreen/ViewModels/Protocols/BookmarkStrategy.swift,
+				WorkSpace/MainScreen/ViewModels/Protocols/ProjectNetworkStrategy.swift,
+				WorkSpace/MainScreen/ViewModels/Protocols/ProjectPersistenceStrategy.swift,
+				WorkSpace/MainScreen/ViewModels/Protocols/ProjectSyncStrategy.swift,
+				WorkSpace/MainScreen/ViewModels/Strategies/BookmarkService.swift,
+				WorkSpace/MainScreen/ViewModels/Strategies/ProjectNetworkService.swift,
+				WorkSpace/MainScreen/ViewModels/Strategies/ProjectPersistenceService.swift,
+				WorkSpace/MainScreen/ViewModels/Strategies/ProjectSyncService.swift,
+				WorkSpace/MainScreen/ViewModels/WorkspaceViewModel.swift,
+				WorkSpace/MainScreen/Views/EmptyStateView.swift,
+				WorkSpace/MainScreen/Views/NewProjectCard.swift,
+				WorkSpace/MainScreen/Views/ProjectCard.swift,
+				WorkSpace/MainScreen/Views/WorkspaceView.swift,
+				"WorkSpace/Models/ FileTreeNode.swift",
+				WorkSpace/Models/Band.swift,
+				WorkSpace/Models/Branch.swift,
+				WorkSpace/Models/Comment.swift,
+				WorkSpace/Models/Commit.swift,
+				WorkSpace/Models/CommitFileSnapshot.swift,
+				WorkSpace/Models/CommitStatus.swift,
+				WorkSpace/Models/DiffResult.swift,
+				WorkSpace/Models/FileBlob.swift,
+				WorkSpace/Models/FileCapabilities.swift,
+				WorkSpace/Models/FileDiff.swift,
+				WorkSpace/Models/FileVersion.swift,
+				WorkSpace/Models/LocalCommit.swift,
+				WorkSpace/Models/LocalFile.swift,
+				WorkSpace/Models/LocalProjectState.swift,
+				WorkSpace/Models/MusicFile.swift,
+				WorkSpace/Models/PendingCommit.swift,
+				WorkSpace/Models/Project.swift,
+				WorkSpace/Models/ProjectDiff.swift,
 				WorkSpace/Models/ProjectError.swift,
-				WorkSpace/Workspace/EmptyStateView.swift,
-				WorkSpace/Workspace/NewProjectCard.swift,
-				WorkSpace/Workspace/ProjectCard.swift,
-				WorkSpace/Workspace/ViewModels/ProjectCardViewModel.swift,
-				WorkSpace/Workspace/ViewModels/Protocols/BookmarkStrategy.swift,
-				WorkSpace/Workspace/ViewModels/Protocols/ProjectNetworkStrategy.swift,
-				WorkSpace/Workspace/ViewModels/Protocols/ProjectPersistenceStrategy.swift,
-				WorkSpace/Workspace/ViewModels/Protocols/ProjectSyncStrategy.swift,
-				WorkSpace/Workspace/ViewModels/Strategies/BookmarkService.swift,
-				WorkSpace/Workspace/ViewModels/Strategies/ProjectNetworkService.swift,
-				WorkSpace/Workspace/ViewModels/Strategies/ProjectPersistenceService.swift,
-				WorkSpace/Workspace/ViewModels/Strategies/ProjectSyncService.swift,
-				WorkSpace/Workspace/ViewModels/WorkspaceViewModel.swift,
-				WorkSpace/Workspace/WorkspaceView.swift,
+				WorkSpace/Models/ProjectVersion.swift,
+				WorkSpace/Models/RemoteFileSnapshot.swift,
+				WorkSpace/Models/SyncStatus.swift,
 			);
 			target = C574AD152F82308F00FBA2E7 /* StemHub(macOS) */;
 		};
@@ -105,25 +130,6 @@
 				Shared/Resources/Utils/Fonts.swift,
 				Shared/Resources/Views/GradientTextField.swift,
 				Shared/Resources/Views/KeyboardAdaptive.swift,
-				Shared/WorkSpaceScreen/MainScreen/Models/Band.swift,
-				Shared/WorkSpaceScreen/MainScreen/Models/Branch.swift,
-				Shared/WorkSpaceScreen/MainScreen/Models/Comment.swift,
-				Shared/WorkSpaceScreen/MainScreen/Models/Commit.swift,
-				Shared/WorkSpaceScreen/MainScreen/Models/CommitFileSnapshot.swift,
-				Shared/WorkSpaceScreen/MainScreen/Models/CommitStatus.swift,
-				Shared/WorkSpaceScreen/MainScreen/Models/DiffResult.swift,
-				Shared/WorkSpaceScreen/MainScreen/Models/FileBlob.swift,
-				Shared/WorkSpaceScreen/MainScreen/Models/FileCapabilities.swift,
-				Shared/WorkSpaceScreen/MainScreen/Models/FileDiff.swift,
-				Shared/WorkSpaceScreen/MainScreen/Models/FileVersion.swift,
-				Shared/WorkSpaceScreen/MainScreen/Models/LocalFile.swift,
-				Shared/WorkSpaceScreen/MainScreen/Models/LocalProjectState.swift,
-				Shared/WorkSpaceScreen/MainScreen/Models/MusicFile.swift,
-				Shared/WorkSpaceScreen/MainScreen/Models/Project.swift,
-				Shared/WorkSpaceScreen/MainScreen/Models/ProjectDiff.swift,
-				Shared/WorkSpaceScreen/MainScreen/Models/ProjectVersion.swift,
-				Shared/WorkSpaceScreen/MainScreen/Models/RemoteFileSnapshot.swift,
-				Shared/WorkSpaceScreen/MainScreen/Models/SyncStatus.swift,
 				Shared/WorkSpaceScreen/MainScreen/Service/FirestoreManager.swift,
 				Shared/WorkSpaceScreen/MainScreen/Service/Protocols/CommitStorageStrategy.swift,
 				Shared/WorkSpaceScreen/MainScreen/Service/Protocols/DiffCalculationStrategy.swift,
@@ -136,9 +142,26 @@
 				Shared/WorkSpaceScreen/MainScreen/Service/Strategies/LocalFileScanner.swift,
 				Shared/WorkSpaceScreen/MainScreen/Service/Strategies/StandardDiffEngine.swift,
 				Shared/WorkSpaceScreen/MainScreen/Service/Sync/SyncOrchestrator.swift,
-				Shared/WorkSpaceScreen/MainScreen/ViewModel/ProjectViewModel.swift,
 			);
 			target = C574AD152F82308F00FBA2E7 /* StemHub(macOS) */;
+		};
+		C5F3516F2F83FA2400BBD37F /* Exceptions for "StemHub(macOS)" folder in "StemHub" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				WorkSpace/DetailedWorkSpace/ViewModels/ProjectDetailViewModel.swift,
+				WorkSpace/MainScreen/ViewModels/ProjectCardViewModel.swift,
+				WorkSpace/MainScreen/ViewModels/Protocols/BookmarkStrategy.swift,
+				WorkSpace/MainScreen/ViewModels/Protocols/ProjectNetworkStrategy.swift,
+				WorkSpace/MainScreen/ViewModels/Protocols/ProjectPersistenceStrategy.swift,
+				WorkSpace/MainScreen/ViewModels/Protocols/ProjectSyncStrategy.swift,
+				WorkSpace/MainScreen/ViewModels/Strategies/ProjectNetworkService.swift,
+				WorkSpace/MainScreen/ViewModels/WorkspaceViewModel.swift,
+				WorkSpace/MainScreen/Views/EmptyStateView.swift,
+				WorkSpace/MainScreen/Views/NewProjectCard.swift,
+				WorkSpace/MainScreen/Views/ProjectCard.swift,
+				WorkSpace/MainScreen/Views/WorkspaceView.swift,
+			);
+			target = C574A87D2F81CF7F00FBA2E7 /* StemHub */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
@@ -159,6 +182,7 @@
 		C574AD792F82374000FBA2E7 /* StemHub(macOS) */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
+				C5F3516F2F83FA2400BBD37F /* Exceptions for "StemHub(macOS)" folder in "StemHub" target */,
 				C51BD6FB2F8257AA00C7E108 /* Exceptions for "StemHub(macOS)" folder in "StemHub(macOS)" target */,
 			);
 			path = "StemHub(macOS)";
@@ -591,7 +615,7 @@
 				ENABLE_RESOURCE_ACCESS_LOCATION = YES;
 				ENABLE_RESOURCE_ACCESS_PRINTING = NO;
 				ENABLE_RESOURCE_ACCESS_USB = NO;
-				ENABLE_USER_SELECTED_FILES = readonly;
+				ENABLE_USER_SELECTED_FILES = readwrite;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "StemHub-macOS--Info.plist";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
@@ -638,7 +662,7 @@
 				ENABLE_RESOURCE_ACCESS_LOCATION = YES;
 				ENABLE_RESOURCE_ACCESS_PRINTING = NO;
 				ENABLE_RESOURCE_ACCESS_USB = NO;
-				ENABLE_USER_SELECTED_FILES = readonly;
+				ENABLE_USER_SELECTED_FILES = readwrite;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "StemHub-macOS--Info.plist";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";

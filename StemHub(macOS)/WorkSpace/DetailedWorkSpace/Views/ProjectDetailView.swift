@@ -7,6 +7,7 @@
 
 import SwiftUI
 import UniformTypeIdentifiers
+import Combine
 
 struct ProjectDetailView: View {
     @StateObject var viewModel: ProjectDetailViewModel
@@ -14,6 +15,9 @@ struct ProjectDetailView: View {
     @State private var showingCommitSheet = false
     @State private var commitMessage = ""
 
+    @State private var selectedFileURL: URL?
+    @State private var selectedAudioURL: URL?
+    
     init(project: Project, localState: LocalProjectState, currentUserID: String?) {
         _viewModel = StateObject(wrappedValue: ProjectDetailViewModel(
             project: project,
@@ -53,6 +57,10 @@ struct ProjectDetailView: View {
         }
     }
 
+    func isDirectory(url: URL) -> Bool {
+        (try? url.resourceValues(forKeys: [.isDirectoryKey]))?.isDirectory ?? false
+    }
+    
     // MARK: - Header
     private var headerView: some View {
         HStack {
@@ -128,7 +136,8 @@ struct ProjectDetailView: View {
         .listStyle(SidebarListStyle())
     }
 
-    // MARK: - Main Content (File Browser + Diff)
+   
+//     MARK: - Main Content (File Browser + Diff)
     private var mainContentView: some View {
         VStack(alignment: .leading, spacing: 12) {
             if let selectedVersion = viewModel.selectedVersion {
@@ -158,12 +167,12 @@ struct ProjectDetailView: View {
             }
 
             ScrollView {
-                LazyVStack(alignment: .leading, spacing: 8) {
-                    ForEach(viewModel.currentFiles) { file in
-                        FileRowView(file: file)
+                LazyVStack(alignment: .leading, spacing: 4) {
+                    ForEach(viewModel.fileTree) { node in
+                        FileTreePlayerNodeView(node: node)
                     }
-                    if viewModel.currentFiles.isEmpty {
-                        Text("No files found in this version.")
+                    if viewModel.fileTree.isEmpty {
+                        Text("No files or folders found.")
                             .foregroundColor(.secondary)
                             .padding()
                     }
@@ -184,6 +193,36 @@ struct ProjectDetailView: View {
             }
         }
     }
+    
+//    private var mainContentView: some View {
+//        HSplitView {
+//            // Left: File tree
+//            FileTreeView(nodes: viewModel.fileTree, selectedFileURL: $selectedFileURL)
+//                .frame(minWidth: 250, idealWidth: 300)
+//                .onReceive(Just(selectedFileURL)) { newURL in
+//                    if let url = newURL, !self.isDirectory(url: url) {
+//                        selectedAudioURL = url
+//                    }
+//                }
+//            
+//            // Right: Audio player / empty state
+//            VStack {
+//                if let audioURL = selectedAudioURL {
+//                    AudioPlayerView(url: audioURL)
+//                        .padding()
+//                    Spacer()
+//                } else {
+//                    ContentUnavailableView(
+//                        "No Audio Selected",
+//                        systemImage: "music.note.list",
+//                        description: Text("Select an audio file from the left panel to play it.")
+//                    )
+//                }
+//            }
+//            .frame(minWidth: 300)
+//            .background(Color(NSColor.textBackgroundColor))
+//        }
+//    }
 
     // MARK: - Toolbar
     @ToolbarContentBuilder
@@ -205,8 +244,12 @@ struct ProjectDetailView: View {
             Button(action: { Task { await viewModel.loadVersionHistory() } }) {
                 Label("Refresh", systemImage: "arrow.clockwise")
             }
+            
             Button(action: { Task { await viewModel.fixFolderPath() } }) {
                 Label("Fix Path", systemImage: "folder.badge.gearshape")
+            }
+            Button(action: { Task { await viewModel.pushAllCommits() } }) {
+                Label("Push", systemImage: "arrow.up.circle.fill")
             }
         }
     }
