@@ -21,6 +21,8 @@ struct Project: Identifiable, Codable, Hashable {
     let createdAt: Date
     let updatedAt: Date
     
+    var posterBase64: String?
+
     func hash(into hasher: inout Hasher) {
         hasher.combine(id)
     }

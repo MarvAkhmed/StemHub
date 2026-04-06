@@ -30,57 +30,39 @@
 		C51BD6FB2F8257AA00C7E108 /* Exceptions for "StemHub(macOS)" folder in "StemHub(macOS)" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				View/TabBar/EnteryViewMacOS.swift,
-				View/TabBar/MainAppShellView.swift,
-				View/TabBar/StemHub_macOS_App.swift,
-				View/WorkSpace/DiffChangeRow.swift,
-				View/WorkSpace/DiffPreviewView.swift,
-				View/WorkSpace/EmptyStateView.swift,
-				View/WorkSpace/FileRowView.swift,
-				View/WorkSpace/NewProjectCard.swift,
-				View/WorkSpace/NewProjectSheetView.swift,
-				View/WorkSpace/ProjectCard.swift,
-				View/WorkSpace/ProjectCardView.swift,
-				View/WorkSpace/ProjectDetailView.swift,
-				View/WorkSpace/SettingsView.swift,
-				View/WorkSpace/VersionRowView.swift,
-				View/WorkSpace/WorkspaceView.swift,
-				ViewModels/AuthorizationViewModel.swift,
-				ViewModels/ProjectDetailViewModel.swift,
+				Settings/SettingsView.swift,
+				TabBar/EnteryViewMacOS.swift,
+				TabBar/MainAppShellView.swift,
+				TabBar/StemHub_macOS_App.swift,
+				WorkSpace/AddProject/Service/DefaultFilePickerService.swift,
+				WorkSpace/AddProject/Service/FilePickerService.swift,
+				WorkSpace/AddProject/View/NewProjectSheetView.swift,
+				WorkSpace/AddProject/ViewModel/NewProjectSheetViewModel.swift,
+				WorkSpace/DetailedWorkSpace/DiffChangeRow.swift,
+				WorkSpace/DetailedWorkSpace/DiffPreviewView.swift,
+				WorkSpace/DetailedWorkSpace/FileRowView.swift,
+				WorkSpace/DetailedWorkSpace/ProjectDetailView.swift,
+				WorkSpace/DetailedWorkSpace/Service/DefaultFileScannerStrategy.swift,
+				WorkSpace/DetailedWorkSpace/Service/FileScannerStrategy.swift,
+				WorkSpace/DetailedWorkSpace/VersionRowView.swift,
+				WorkSpace/DetailedWorkSpace/ViewModels/ProjectDetailViewModel.swift,
+				WorkSpace/Models/ProjectError.swift,
+				WorkSpace/Workspace/EmptyStateView.swift,
+				WorkSpace/Workspace/NewProjectCard.swift,
+				WorkSpace/Workspace/ProjectCard.swift,
+				WorkSpace/Workspace/ViewModels/ProjectCardViewModel.swift,
+				WorkSpace/Workspace/ViewModels/Protocols/BookmarkStrategy.swift,
+				WorkSpace/Workspace/ViewModels/Protocols/ProjectNetworkStrategy.swift,
+				WorkSpace/Workspace/ViewModels/Protocols/ProjectPersistenceStrategy.swift,
+				WorkSpace/Workspace/ViewModels/Protocols/ProjectSyncStrategy.swift,
+				WorkSpace/Workspace/ViewModels/Strategies/BookmarkService.swift,
+				WorkSpace/Workspace/ViewModels/Strategies/ProjectNetworkService.swift,
+				WorkSpace/Workspace/ViewModels/Strategies/ProjectPersistenceService.swift,
+				WorkSpace/Workspace/ViewModels/Strategies/ProjectSyncService.swift,
+				WorkSpace/Workspace/ViewModels/WorkspaceViewModel.swift,
+				WorkSpace/Workspace/WorkspaceView.swift,
 			);
 			target = C574AD152F82308F00FBA2E7 /* StemHub(macOS) */;
-		};
-		C51BD7372F8258F800C7E108 /* Exceptions for "StemHub(macOS)" folder in "StemHub" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				View/TabBar/EnteryViewMacOS.swift,
-				View/TabBar/MainAppShellView.swift,
-				View/TabBar/StemHub_macOS_App.swift,
-				View/WorkSpace/DiffChangeRow.swift,
-				View/WorkSpace/DiffPreviewView.swift,
-				View/WorkSpace/EmptyStateView.swift,
-				View/WorkSpace/FileRowView.swift,
-				View/WorkSpace/NewProjectCard.swift,
-				View/WorkSpace/NewProjectSheetView.swift,
-				View/WorkSpace/ProjectCard.swift,
-				View/WorkSpace/ProjectCardView.swift,
-				View/WorkSpace/ProjectDetailView.swift,
-				View/WorkSpace/SettingsView.swift,
-				View/WorkSpace/VersionRowView.swift,
-				View/WorkSpace/WorkspaceView.swift,
-				ViewModels/AuthorizationViewModel.swift,
-				ViewModels/ProjectDetailViewModel.swift,
-			);
-			target = C574A87D2F81CF7F00FBA2E7 /* StemHub */;
-		};
-		C51BD8A02F82630B00C7E108 /* Exceptions for "StemHub" folder in "StemHub" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				Info.plist,
-				Shared/Resources/Extentions/View_iOS.swift,
-				"Shared/Resources/GoogleService-Info-macOS.plist",
-			);
-			target = C574A87D2F81CF7F00FBA2E7 /* StemHub */;
 		};
 		C574AD782F8234D400FBA2E7 /* Exceptions for "StemHub" folder in "StemHub(macOS)" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
@@ -155,7 +137,6 @@
 				Shared/WorkSpaceScreen/MainScreen/Service/Strategies/StandardDiffEngine.swift,
 				Shared/WorkSpaceScreen/MainScreen/Service/Sync/SyncOrchestrator.swift,
 				Shared/WorkSpaceScreen/MainScreen/ViewModel/ProjectViewModel.swift,
-				Shared/WorkSpaceScreen/MainScreen/ViewModel/WorkspaceViewModel.swift,
 			);
 			target = C574AD152F82308F00FBA2E7 /* StemHub(macOS) */;
 		};
@@ -165,7 +146,6 @@
 		C574A8802F81CF7F00FBA2E7 /* StemHub */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				C51BD8A02F82630B00C7E108 /* Exceptions for "StemHub" folder in "StemHub" target */,
 				C574AD782F8234D400FBA2E7 /* Exceptions for "StemHub" folder in "StemHub(macOS)" target */,
 			);
 			path = StemHub;
@@ -179,7 +159,6 @@
 		C574AD792F82374000FBA2E7 /* StemHub(macOS) */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				C51BD7372F8258F800C7E108 /* Exceptions for "StemHub(macOS)" folder in "StemHub" target */,
 				C51BD6FB2F8257AA00C7E108 /* Exceptions for "StemHub(macOS)" folder in "StemHub(macOS)" target */,
 			);
 			path = "StemHub(macOS)";
@@ -219,9 +198,9 @@
 		C574A8752F81CF7F00FBA2E7 = {
 			isa = PBXGroup;
 			children = (
+				C574ACFF2F822FBB00FBA2E7 /* StemHub(iOS) */,
 				C574A8802F81CF7F00FBA2E7 /* StemHub */,
 				C574AD792F82374000FBA2E7 /* StemHub(macOS) */,
-				C574ACFF2F822FBB00FBA2E7 /* StemHub(iOS) */,
 				C574A87F2F81CF7F00FBA2E7 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -604,12 +583,12 @@
 				ENABLE_INCOMING_NETWORK_CONNECTIONS = YES;
 				ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES;
 				ENABLE_PREVIEWS = YES;
-				ENABLE_RESOURCE_ACCESS_AUDIO_INPUT = NO;
+				ENABLE_RESOURCE_ACCESS_AUDIO_INPUT = YES;
 				ENABLE_RESOURCE_ACCESS_BLUETOOTH = NO;
-				ENABLE_RESOURCE_ACCESS_CALENDARS = NO;
+				ENABLE_RESOURCE_ACCESS_CALENDARS = YES;
 				ENABLE_RESOURCE_ACCESS_CAMERA = NO;
-				ENABLE_RESOURCE_ACCESS_CONTACTS = NO;
-				ENABLE_RESOURCE_ACCESS_LOCATION = NO;
+				ENABLE_RESOURCE_ACCESS_CONTACTS = YES;
+				ENABLE_RESOURCE_ACCESS_LOCATION = YES;
 				ENABLE_RESOURCE_ACCESS_PRINTING = NO;
 				ENABLE_RESOURCE_ACCESS_USB = NO;
 				ENABLE_USER_SELECTED_FILES = readonly;
@@ -651,12 +630,12 @@
 				ENABLE_INCOMING_NETWORK_CONNECTIONS = YES;
 				ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES;
 				ENABLE_PREVIEWS = YES;
-				ENABLE_RESOURCE_ACCESS_AUDIO_INPUT = NO;
+				ENABLE_RESOURCE_ACCESS_AUDIO_INPUT = YES;
 				ENABLE_RESOURCE_ACCESS_BLUETOOTH = NO;
-				ENABLE_RESOURCE_ACCESS_CALENDARS = NO;
+				ENABLE_RESOURCE_ACCESS_CALENDARS = YES;
 				ENABLE_RESOURCE_ACCESS_CAMERA = NO;
-				ENABLE_RESOURCE_ACCESS_CONTACTS = NO;
-				ENABLE_RESOURCE_ACCESS_LOCATION = NO;
+				ENABLE_RESOURCE_ACCESS_CONTACTS = YES;
+				ENABLE_RESOURCE_ACCESS_LOCATION = YES;
 				ENABLE_RESOURCE_ACCESS_PRINTING = NO;
 				ENABLE_RESOURCE_ACCESS_USB = NO;
 				ENABLE_USER_SELECTED_FILES = readonly;

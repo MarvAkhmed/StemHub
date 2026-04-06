@@ -12,4 +12,5 @@ enum CommitStatus: String, Codable {
     case pushing
     case pushed
     case failed
+    case pending
 }

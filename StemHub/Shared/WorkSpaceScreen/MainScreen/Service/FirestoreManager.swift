@@ -46,7 +46,8 @@ protocol FirestoreUserStrategy {
 }
 
 protocol FirestoreStorageStrategy {
-    func uploadProjectPoster(projectID: String, image: Any) async throws -> String
+//    func uploadProjectPoster(projectID: String, image: Any) async throws -> String
+    func uploadProjectPoster(projectID: String, image: NSImage) async throws -> String
     func updateProjectPoster(projectID: String, posterURL: String) async throws
 }
 
@@ -262,17 +263,26 @@ struct DefaultFirestoreStorageStrategy: FirestoreStorageStrategy {
     private let db = Firestore.firestore()
     
     #if os(macOS)
-    func uploadProjectPoster(projectID: String, image: Any) async throws -> String {
-        guard let nsImage = image as? NSImage,
-              let tiffData = nsImage.tiffRepresentation,
-              let bitmap = NSBitmapImageRep(data: tiffData),
-              let pngData = bitmap.representation(using: .png, properties: [:]) else {
-            throw NSError(domain: "Image conversion failed", code: -1)
+
+    func uploadProjectPoster(projectID: String, image: NSImage) async throws -> String {
+        let timestamp = Int(Date().timeIntervalSince1970)
+        let fileName = "\(projectID)_\(timestamp).png"
+        let storageRef = Storage.storage().reference().child("projectPosters/\(fileName)")
+        
+        guard let data = image.tiffRepresentation,
+              let pngData = NSBitmapImageRep(data: data)?.representation(using: .png, properties: [:]) else {
+            throw NSError(domain: "ImageConversion", code: -1)
         }
         
-        let storageRef = storage.reference().child("projectPosters/\(projectID).png")
+        // Direct upload – no delete, no metadata check
         _ = try await storageRef.putDataAsync(pngData)
         let url = try await storageRef.downloadURL()
+        
+        // Update the project with this new URL
+        try await db.collection("projects").document(projectID).updateData([
+            "posterURL": url.absoluteString
+        ])
+        
         return url.absoluteString
     }
     #endif
@@ -425,35 +435,38 @@ final class FirestoreManager {
             userID: userID
         )
         
-        var state = LocalProjectState(
+        // Create an empty commit (no files)
+        let emptyCommit = Commit(
+            id: UUID().uuidString,
             projectID: project.id,
-            localPath: localFolderURL.path,
-            lastPulledVersionID: nil,
-            lastCommittedID: nil,
-            currentBranchID: branch.id
-        )
-        
-        let initialCommit = try await syncOrchestrator.commit(
-            localPath: localFolderURL,
-            localState: state,
-            remoteSnapshot: [],
-            userID: userID,
-            message: "Initial commit"
+            parentCommitID: nil,
+            basedOnVersionID: "",                       // no base version yet
+            diff: ProjectDiff(files: []),               // empty diff
+            fileSnapshot: [],                           // no files
+            createdBy: userID,
+            createdAt: Date(),
+            message: "Initial empty commit",
+            status: .pending
         )
         
         let projectVersion = try await syncOrchestrator.pushCommit(
-            initialCommit,
+            emptyCommit,
             localRootURL: localFolderURL,
             branchID: branch.id
         )
-        
-        state.lastCommittedID = initialCommit.id
-        state.lastPulledVersionID = projectVersion.id
         
         var updatedProject = project
         updatedProject.currentBranchID = branch.id
         updatedProject.currentVersionID = projectVersion.id
         try await projectStrategy.updateProject(updatedProject)
+        
+        let state = LocalProjectState(
+            projectID: project.id,
+            localPath: localFolderURL.path,
+            lastPulledVersionID: projectVersion.id,
+            lastCommittedID: emptyCommit.id,
+            currentBranchID: branch.id
+        )
         
         return (updatedProject, state)
     }

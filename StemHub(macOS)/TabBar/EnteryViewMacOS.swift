@@ -16,6 +16,11 @@ struct EnteryViewMacOS<SVM: SocialLoginViewModelProtocol,
     @State private var isCheckingSession: Bool = true
     
     var body: some View {
+      content()
+    }
+    
+    @ViewBuilder
+    private func content() -> some View {
         Group {
             if isCheckingSession {
                 LoadingView(message: "Checking your session...")
@@ -31,13 +36,11 @@ struct EnteryViewMacOS<SVM: SocialLoginViewModelProtocol,
                     .loadingOverlay(
                         isLoading: socialViewModel.isLoading || authorizationViewModel.isLoading,
                         message: socialViewModel.isLoading || authorizationViewModel.isLoading
-                            ? (socialViewModel.isLoading ? socialViewModel.isLoadingMessage : authorizationViewModel.isLoadingMessage)
-                            : "Loading..."
+                        ? (socialViewModel.isLoading ? socialViewModel.isLoadingMessage : authorizationViewModel.isLoadingMessage)
+                        : "Loading..."
                     )
             }
-        }
-        .onAppear {
-            // Give time for session restoration to complete
+        }.onAppear {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                 isCheckingSession = false
             }
