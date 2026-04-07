@@ -555,9 +555,24 @@ final class ProjectDetailViewModel: ProjectDetailViewModelProtocol {
         if let url = accessedFolderURL {
             return url
         }
+        
         let bookmarkData = UserDefaults.standard.data(forKey: "project_\(project.id)_bookmark")
         let localPath = fileService.localPath(for: project.id)
-        let url = fileService.accessibleFolderURL(for: project.id, bookmarkData: bookmarkData, localPath: localPath)
+        
+        guard let url = fileService.accessibleFolderURL(for: project.id,
+                                                         bookmarkData: bookmarkData,
+                                                         localPath: localPath) else {
+            print("⚠️ Cannot get accessible folder URL for project: \(project.id)")
+            return nil
+        }
+        
+        // Start accessing and store
+        let didStart = url.startAccessingSecurityScopedResource()
+        if !didStart {
+            print("⚠️ Failed to start accessing security-scoped resource")
+            return nil
+        }
+        
         accessedFolderURL = url
         return url
     }

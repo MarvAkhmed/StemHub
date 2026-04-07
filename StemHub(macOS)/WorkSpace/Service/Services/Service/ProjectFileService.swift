@@ -38,25 +38,68 @@ final class DefaultProjectFileService: ProjectFileService {
                                   options: .withSecurityScope,
                                   relativeTo: nil,
                                   bookmarkDataIsStale: &isStale)
-                if !isStale && url.startAccessingSecurityScopedResource() {
+                
+                if isStale {
+                    print("⚠️ Bookmark is stale for project: \(projectID)")
+                    // Don't return nil - fall back to localPath
+                    let fallbackURL = URL(fileURLWithPath: localPath)
+                    if FileManager.default.isReadableFile(atPath: fallbackURL.path) {
+                        return fallbackURL
+                    }
+                    return nil
+                }
+                
+                // Verify we can actually access this URL
+                if url.startAccessingSecurityScopedResource() {
+                    url.stopAccessingSecurityScopedResource() // Caller will start their own access
                     return url
+                } else {
+                    print("⚠️ Cannot access security-scoped resource for project: \(projectID)")
+                    // Fall back to direct path
+                    let fallbackURL = URL(fileURLWithPath: localPath)
+                    if FileManager.default.isReadableFile(atPath: fallbackURL.path) {
+                        return fallbackURL
+                    }
+                    return nil
                 }
             } catch {
-                print("Bookmark resolution failed: \(error)")
+                print("❌ Bookmark resolution error: \(error)")
+                // Fall back to direct path
+                let fallbackURL = URL(fileURLWithPath: localPath)
+                if FileManager.default.isReadableFile(atPath: fallbackURL.path) {
+                    return fallbackURL
+                }
+                return nil
             }
         }
-        // Fallback to direct path
+        
+        // No bookmark, try direct path
         let url = URL(fileURLWithPath: localPath)
-        return url
+        if FileManager.default.isReadableFile(atPath: url.path) {
+            return url
+        }
+        
+        return nil
     }
     
     func fileTree(for projectID: String, localPath: String) -> [FileTreeNode] {
+        // Try to get bookmark data first
+        let bookmarkData = UserDefaults.standard.data(forKey: "project_\(projectID)_bookmark")
+        
         guard let folderURL = accessibleFolderURL(for: projectID,
-                                                  bookmarkData: nil,
-                                                  localPath: localPath) else {
+                                                    bookmarkData: bookmarkData,
+                                                    localPath: localPath) else {
+            print(" Cannot access folder for project: \(projectID)")
             return []
         }
-        defer { folderURL.stopAccessingSecurityScopedResource() }
+        
+        let didStartAccess = folderURL.startAccessingSecurityScopedResource()
+        defer {
+            if didStartAccess {
+                folderURL.stopAccessingSecurityScopedResource()
+            }
+        }
+        
         return buildFileTree(at: folderURL)
     }
     

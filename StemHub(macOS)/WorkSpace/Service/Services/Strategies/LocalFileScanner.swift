@@ -40,7 +40,7 @@ struct LocalFileScanner: FileScanStrategy {
                 if isDirectory {
                     // Check if directory is readable
                     if !FileManager.default.isReadableFile(atPath: url.path) {
-                        print("⚠️ Skipping unreadable directory: \(url.path)")
+                        print("Skipping unreadable directory: \(url.path)")
                         enumerator?.skipDescendants()
                         continue
                     }
@@ -62,7 +62,7 @@ struct LocalFileScanner: FileScanStrategy {
                 files.append(file)
             } catch {
                 // Log but don't crash - skip this file/directory
-                print("⚠️ Failed to read file at \(url.path): \(error.localizedDescription)")
+                print(" Failed to read file at \(url.path): \(error.localizedDescription)")
                 var isDirectory: ObjCBool = false
                 if FileManager.default.fileExists(atPath: url.path, isDirectory: &isDirectory), isDirectory.boolValue {
                     enumerator?.skipDescendants()
@@ -104,7 +104,7 @@ struct LocalFileScanner: FileScanStrategy {
         }
         
         guard let data = try? Data(contentsOf: url) else {
-            print("⚠️ Failed to read file for hashing: \(url.path)")
+            print(" Failed to read file for hashing: \(url.path)")
             return ""
         }
         let hash = SHA256.hash(data: data)
