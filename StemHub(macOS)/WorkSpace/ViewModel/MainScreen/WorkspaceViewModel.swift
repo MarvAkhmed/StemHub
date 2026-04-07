@@ -10,54 +10,81 @@ import Foundation
 import SwiftUI
 import FirebaseFirestore
 
-final class WorkspaceViewModel: ObservableObject {
+protocol WorkspaceViewModelProtocol: ObservableObject {
+    var authService: AuthServiceProtocol { get}
+    var projects: [Project] { get }
+    var bands: [Band] { get }
+    var isLoading: Bool { get }
+    var errorMessage: String? { get }
+    var isCreatingProject: Bool { get }
+    var isLoadingMessage: String { get }
     
+    func loadProjects() async
+    func createProject(name: String, folderURL: URL?, band: Band?, poster: NSImage?) async
+    func pullProject(_ project: Project) async
+    func commitProjectChanges(_ project: Project) async
+    func getLocalState(for project: Project) -> LocalProjectState
+}
+
+final class WorkspaceViewModel: WorkspaceViewModelProtocol {
+    
+    // MARK: - Dependencies (all injected)
+    let authService: AuthServiceProtocol
+    private let persistenceStrategy: ProjectPersistenceStrategy
+    private let networkStrategy: ProjectNetworkStrategy
+    private let syncStrategy: ProjectSyncService
+    private let bookmarkStrategy: BookmarkStrategy
+    
+    // MARK: - Computed user ID (single source of truth)
+    var currentUserID: String? { authService.currentUser?.id }
+    
+    // MARK: - UI State
     @Published var projects: [Project] = []
     @Published var bands: [Band] = []
     @Published var isLoading = false
+    @Published var isLoadingMessage = "Loading..."
     @Published var errorMessage: String?
     @Published var isCreatingProject = false
-    @Published var isLoadingMessage = "Loading..."
     
-    private let currentUser: User
-    private let persistenceStrategy: ProjectPersistenceStrategy
-    private let networkStrategy: ProjectNetworkStrategy
-    private let syncStrategy: ProjectSyncStrategy
-    private let bookmarkStrategy: BookmarkStrategy
-    var currentUserID: String { currentUser.id }
     
-    init(currentUser: User,
-         persistenceStrategy: ProjectPersistenceStrategy = DefaultProjectPersistenceStrategy(),
-         networkStrategy: ProjectNetworkStrategy = DefaultProjectNetworkStrategy(),
-         syncStrategy: ProjectSyncStrategy = DefaultProjectSyncStrategy(),
-         bookmarkStrategy: BookmarkStrategy = DefaultBookmarkStrategy()) {
-        self.currentUser = currentUser
+    // MARK: - Init
+    init(
+        authService: AuthServiceProtocol,
+        persistenceStrategy: ProjectPersistenceStrategy = DefaultProjectPersistenceStrategy(),
+        networkStrategy: ProjectNetworkStrategy = DefaultProjectNetworkStrategy(),
+        syncStrategy: ProjectSyncService = DefaultProjectSyncService(),
+        bookmarkStrategy: BookmarkStrategy = DefaultBookmarkStrategy()
+    ) {
+        self.authService = authService
         self.persistenceStrategy = persistenceStrategy
         self.networkStrategy = networkStrategy
         self.syncStrategy = syncStrategy
         self.bookmarkStrategy = bookmarkStrategy
+        
         Task { await loadProjects() }
     }
- 
     
-    // MARK: - Public Methods
     
     func loadProjects() async {
-        isLoading = true
-        defer { isLoading = false }
+        setLoading(true)
+        defer { Task { setLoading(false) } }
+        
+        guard let userID = getValidatedUserID() else { return }
         
         do {
-            bands = try await networkStrategy.fetchBands(for: currentUser.id)
-            projects = try await networkStrategy.fetchAllProjects(for: currentUser.id)
-            await migratePostersToBase64()
+            async let fetchedBands = networkStrategy.fetchBands(for: userID)
+            async let fetchedProjects = networkStrategy.fetchAllProjects(for: userID)
+            let (bandsResult, projectsResult) = try await (fetchedBands, fetchedProjects)
             
+            await MainActor.run {
+                self.bands = bandsResult
+                self.projects = projectsResult
+            }
+            await migratePostersToBase64()
         } catch {
-            errorMessage = error.localizedDescription
+            setError(error.localizedDescription)
         }
     }
-    
-    
-#if os(macOS)
     
     func migratePostersToBase64() async {
         for project in projects where project.posterURL != nil && project.posterBase64 == nil {
@@ -65,201 +92,143 @@ final class WorkspaceViewModel: ObservableObject {
                   let data = try? Data(contentsOf: url),
                   let image = NSImage(data: data) else { continue }
             
-            // Convert to base64
             guard let tiffData = image.tiffRepresentation,
                   let bitmap = NSBitmapImageRep(data: tiffData),
                   let jpegData = bitmap.representation(using: .jpeg, properties: [.compressionFactor: 0.7]) else { continue }
             
             let base64 = jpegData.base64EncodedString()
             
-            // Update Firestore document
             do {
                 try await networkStrategy.getFirestore()
                     .collection("projects")
                     .document(project.id)
                     .updateData(["posterBase64": base64])
                 print("✅ Migrated poster for project \(project.name)")
-            } catch {
-                print("❌ Migration failed for \(project.name): \(error)")
-            }
-            
-            // Update local project
-            var updatedProject = project
-            updatedProject.posterBase64 = base64
-            if let index = projects.firstIndex(where: { $0.id == project.id }) {
+                
                 await MainActor.run {
-                    projects[index] = updatedProject
+                    if let index = projects.firstIndex(where: { $0.id == project.id }) {
+                        var updatedProject = projects[index]
+                        updatedProject.posterBase64 = base64
+                        projects[index] = updatedProject
+                    }
                 }
+            } catch {
+                print(" Migration failed for \(project.name): \(error)")
             }
         }
     }
     
     func createProject(name: String, folderURL: URL?, band: Band?, poster: NSImage?) async {
-        // 1. Prevent concurrent creation attempts
         guard !isCreatingProject else {
-            errorMessage = "Already creating a project, please wait."
+            setError("Already creating a project, please wait.")
+            return
+        }
+        guard let folderURL = folderURL, let currentUserID = currentUserID else {
+             setError("Missing folder or user not logged in")
             return
         }
         
-        guard let folderURL = folderURL else { return }
+         setCreating(true, message: "Creating project...")
         
-        await MainActor.run {
-            isCreatingProject = true
-            isLoading = true
-            isLoadingMessage = "Creating project..."
-        }
-        
-        // Clean the name for comparison (trim whitespace, case‑insensitive)
         let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
         
         do {
-            var targetBand: Band
+            let targetBand = try await resolveBand(trimmedName, band: band, userID: currentUserID)
             
-            if let existingBand = band {
-                targetBand = existingBand
-                
-                if projects.contains(where: { $0.name.caseInsensitiveCompare(trimmedName) == .orderedSame && $0.bandID == targetBand.id }) {
-                    throw ProjectError.duplicateName
-                }
-                
-                let exists = try await networkStrategy.checkDuplicateProject(name: trimmedName, bandID: targetBand.id)
-                if exists {
-                    throw ProjectError.duplicateName
-                }
-            } else {
-                targetBand = try await networkStrategy.createBand(name: "\(trimmedName) Band", userID: currentUser.id)
-                try await networkStrategy.addBand(to: currentUser.id, bandID: targetBand.id)
-            }
-            
-            // Create the project on Firestore (without poster)
             let (project, projectState) = try await networkStrategy.createProject(
                 name: trimmedName,
                 bandID: targetBand.id,
                 localFolderURL: folderURL,
-                userID: currentUser.id
+                userID: currentUserID
             )
             
             if let branchID = projectState.currentBranchID, !branchID.isEmpty {
                 persistenceStrategy.setCurrentBranchID(branchID, for: project.id)
             }
             
-            // Store bookmark and local path
-            do {
-                
-                let bookmarkData = try bookmarkStrategy.createBookmark(for: folderURL)
-                persistenceStrategy.storeBookmark(data: bookmarkData, for: project.id)
-                print("✅ Bookmark: \(bookmarkData)  saved for \(folderURL.path)")
-            } catch {
-                print("❌ Bookmark failed: \(error)")
-            }
-            persistenceStrategy.setLocalPath(folderURL.path, for: project.id)
+            try saveBookmarkAndPath(folderURL, for: project.id)
             
-            // Now upload the poster using the REAL project ID
             var finalProject = project
-            // In createProject, after setting finalProject.posterBase64
-            if let poster = poster,
-               let tiffData = poster.tiffRepresentation,
-               let bitmap = NSBitmapImageRep(data: tiffData),
-               let jpegData = bitmap.representation(using: .jpeg, properties: [.compressionFactor: 0.7]) {
-                let base64 = jpegData.base64EncodedString()
-                finalProject.posterBase64 = base64
-                
-                // ✅ Persist to Firestore
-                try await networkStrategy.getFirestore()
-                    .collection("projects")
-                    .document(project.id)
-                    .updateData(["posterBase64": base64])
+            if let poster = poster {
+                finalProject = try await attachPoster(poster, to: project)
             }
             
             await MainActor.run {
                 projects.append(finalProject)
             }
-            
-        } catch let error as ProjectError {
-            await MainActor.run { errorMessage = error.localizedDescription }
         } catch {
-            await MainActor.run { errorMessage = error.localizedDescription }
+            setError(error.localizedDescription)
         }
         
-        await MainActor.run {
-            isCreatingProject = false
-            isLoading = false
-        }
+         setCreating(false)
     }
-#endif
     
     func pullProject(_ project: Project) async {
+        let branchID = project.currentBranchID
+        guard !branchID.isEmpty else {
+            setError("No branch selected")
+            return
+        }
+        
+        let localPath = persistenceStrategy.getLocalPath(for: project.id)
+        var state = LocalProjectState(
+            projectID: project.id,
+            localPath: localPath,
+            lastPulledVersionID: nil,
+            lastCommittedID: nil,
+            currentBranchID: branchID
+        )
+        
         do {
-            let branchID = project.currentBranchID
-            guard !branchID.isEmpty else { return }
-            
-            let localPath = persistenceStrategy.getLocalPath(for: project.id)
-            var state = LocalProjectState(
-                projectID: project.id,
-                localPath: localPath,
-                lastPulledVersionID: nil,
-                lastCommittedID: nil,
-                currentBranchID: branchID
-            )
-            
             state = try await networkStrategy.pullProject(
                 projectID: project.id,
                 branchID: branchID,
                 localRootURL: URL(fileURLWithPath: state.localPath),
                 state: state
             )
-            
             persistenceStrategy.setLastPulledVersionID(state.lastPulledVersionID, for: project.id)
-            
         } catch {
-            errorMessage = error.localizedDescription
+            setError(error.localizedDescription)
         }
     }
     
     func commitProjectChanges(_ project: Project) async {
+        let projectId = project.id
+        let branchID = project.currentBranchID
+        guard validateBranch(branchID) else { return }
+        guard let currentUserID = getValidatedUserID() else { return }
+        let localPath = persistenceStrategy.getLocalPath(for: project.id)
+        let lastPulled = persistenceStrategy.getLastPulledVersionID(for: project.id)
+        
+        let state = LocalProjectState(
+            projectID: projectId,
+            localPath: localPath,
+            lastPulledVersionID: lastPulled,
+            lastCommittedID: nil,
+            currentBranchID: branchID
+        )
+        
         do {
-            let branchID = project.currentBranchID
-            guard !branchID.isEmpty else { return }
-            
-            let localPath = persistenceStrategy.getLocalPath(for: project.id)
-            let lastPulled = persistenceStrategy.getLastPulledVersionID(for: project.id)
-            
-            let state = LocalProjectState(
+            let commit = try await syncStrategy.createCommit(
                 projectID: project.id,
+                branchID: branchID,
                 localPath: localPath,
                 lastPulledVersionID: lastPulled,
-                lastCommittedID: nil,
-                currentBranchID: branchID
-            )
-            
-            let scanner = LocalFileScanner()
-            let localFiles = try scanner.scan(folderURL: URL(fileURLWithPath: state.localPath))
-            print("local files: \(localFiles)")
-            
-            var remoteSnapshot: [RemoteFileSnapshot] = []
-            if let lastPulled = state.lastPulledVersionID {
-                remoteSnapshot = try await networkStrategy.fetchRemoteSnapshot(versionID: lastPulled)
-            }
-            
-            let commit = try await syncStrategy.commit(
-                localPath: URL(fileURLWithPath: state.localPath),
-                localState: state,
-                remoteSnapshot: remoteSnapshot,
-                userID: currentUser.id,
+                files: [],
+                userID: currentUserID,
                 message: "Commit from UI"
             )
             
             _ = try await networkStrategy.pushCommit(commit, localRootURL: URL(fileURLWithPath: state.localPath), branchID: branchID)
         } catch {
-            errorMessage = error.localizedDescription
+            setError(error.localizedDescription)
         }
     }
     
     func getLocalState(for project: Project) -> LocalProjectState {
-        let localPath = persistenceStrategy.getLocalPath(for: project.id)
-        return LocalProjectState(
+        LocalProjectState(
             projectID: project.id,
-            localPath: localPath,
+            localPath: persistenceStrategy.getLocalPath(for: project.id),
             lastPulledVersionID: persistenceStrategy.getLastPulledVersionID(for: project.id),
             lastCommittedID: nil,
             currentBranchID: project.currentBranchID
@@ -267,4 +236,88 @@ final class WorkspaceViewModel: ObservableObject {
     }
 }
 
+// MARK: - Logic Helpers
+private extension WorkspaceViewModel {
+    private func getValidatedUserID() -> String? {
+        guard let userID = currentUserID else {
+            setError("User not logged in")
+            return nil
+        }
+        return userID
+    }
+    
+    private func validateBranch(_ branchID: String) -> Bool {
+        guard !branchID.isEmpty else {
+            setError("Missing branch")
+            return false
+        }
+        return true
+    }
+    
+    private func resolveBand(_ name: String, band: Band?, userID: String) async throws -> Band {
+        if let existingBand = band {
+            if projects.contains(where: { $0.name.caseInsensitiveCompare(name) == .orderedSame && $0.bandID == existingBand.id }) {
+                throw ProjectError.duplicateName
+            }
+            let exists = try await networkStrategy.checkDuplicateProject(name: name, bandID: existingBand.id)
+            if exists { throw ProjectError.duplicateName }
+            return existingBand
+        } else {
+            let newBand = try await networkStrategy.createBand(name: "\(name) Band", userID: userID)
+            try await networkStrategy.addBand(to: userID, bandID: newBand.id)
+            return newBand
+        }
+    }
+    
+    private func saveBookmarkAndPath(_ folderURL: URL, for projectID: String) throws {
+        do {
+            let bookmarkData = try bookmarkStrategy.createBookmark(for: folderURL)
+            persistenceStrategy.storeBookmark(data: bookmarkData, for: projectID)
+            print("Bookmark saved for \(folderURL.path)")
+        } catch {
+            print(" Bookmark failed: \(error)")
+        }
+        persistenceStrategy.setLocalPath(folderURL.path, for: projectID)
+    }
+    
+    private func attachPoster(_ poster: NSImage, to project: Project) async throws -> Project {
+        guard let tiffData = poster.tiffRepresentation,
+              let bitmap = NSBitmapImageRep(data: tiffData),
+              let jpegData = bitmap.representation(using: .jpeg, properties: [.compressionFactor: 0.7]) else {
+            return project
+        }
+        let base64 = jpegData.base64EncodedString()
+        try await networkStrategy.getFirestore()
+            .collection("projects")
+            .document(project.id)
+            .updateData(["posterBase64": base64])
+        var updated = project
+        updated.posterBase64 = base64
+        return updated
+    }
+}
 
+// MARK: - UI Helpers
+private extension WorkspaceViewModel {
+    @MainActor
+    private func setLoading(_ loading: Bool, message: String = "Loading...")  {
+        isLoading = loading
+        isLoadingMessage = message
+    }
+    
+    @MainActor
+    private func setCreating(_ creating: Bool, message: String = "") {
+        isCreatingProject = creating
+        if creating {
+            isLoading = true
+            isLoadingMessage = message
+        } else {
+            isLoading = false
+        }
+    }
+    
+    @MainActor
+    private func setError(_ message: String)  {
+        errorMessage = message
+    }
+}

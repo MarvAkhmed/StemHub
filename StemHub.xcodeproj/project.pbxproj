@@ -73,28 +73,31 @@
 				WorkSpace/Models/ProjectVersion.swift,
 				WorkSpace/Models/RemoteFileSnapshot.swift,
 				WorkSpace/Models/SyncStatus.swift,
-				WorkSpace/Service/FireStore/DefaultFirestoreBandStrategy.swift,
-				WorkSpace/Service/FireStore/DefaultFirestoreBranchStrategy.swift,
-				WorkSpace/Service/FireStore/DefaultFirestoreProjectStrategy.swift,
-				WorkSpace/Service/FireStore/DefaultFirestoreStorageStrategy.swift,
-				WorkSpace/Service/FireStore/DefaultFirestoreUserStrategy.swift,
-				WorkSpace/Service/FireStore/DefaultFirestoreVersionStrategy.swift,
+				WorkSpace/Service/FireStore/FirestoreBandStrategy.swift,
+				WorkSpace/Service/FireStore/FirestoreBlobStrategy.swift,
+				WorkSpace/Service/FireStore/FirestoreBranchStrategy.swift,
 				WorkSpace/Service/FireStore/FirestoreManager.swift,
-				WorkSpace/Service/Services/BookmarkStrategy.swift,
-				WorkSpace/Service/Services/CommitApplicationStrategy.swift,
-				WorkSpace/Service/Services/CommitStorageStrategy.swift,
-				WorkSpace/Service/Services/DetailedWorkSpace/DiffEngineStrategy.swift,
-				WorkSpace/Service/Services/FilePickerService.swift,
-				WorkSpace/Service/Services/FileScannerStrategy.swift,
-				WorkSpace/Service/Services/FileUploadService.swift,
-				WorkSpace/Service/Services/FirestoreRemoteFetch.swift,
-				WorkSpace/Service/Services/LocalCommitStorageService.swift,
-				WorkSpace/Service/Services/LocalFileScanner.swift,
-				WorkSpace/Service/Services/PosterEncoderService.swift,
-				WorkSpace/Service/Services/ProjectCreationService.swift,
-				WorkSpace/Service/Services/ProjectNetworkService.swift,
-				WorkSpace/Service/Services/ProjectPersistenceService.swift,
-				WorkSpace/Service/Services/ProjectSyncService.swift,
+				WorkSpace/Service/FireStore/FirestoreProjectStrategy.swift,
+				WorkSpace/Service/FireStore/FirestoreStorageStrategy.swift,
+				WorkSpace/Service/FireStore/FirestoreUserStrategy.swift,
+				WorkSpace/Service/FireStore/FirestoreVersionStrategy.swift,
+				WorkSpace/Service/Services/Service/LocalCommitService.swift,
+				WorkSpace/Service/Services/Service/ProjectFileService.swift,
+				WorkSpace/Service/Services/Service/ProjectSyncService.swift,
+				WorkSpace/Service/Services/Service/ProjectVersionService.swift,
+				WorkSpace/Service/Services/Strategies/BookmarkStrategy.swift,
+				WorkSpace/Service/Services/Strategies/CommitApplicationStrategy.swift,
+				WorkSpace/Service/Services/Strategies/CommitStorageStrategy.swift,
+				WorkSpace/Service/Services/Strategies/DiffEngineStrategy.swift,
+				WorkSpace/Service/Services/Strategies/FilePickerService.swift,
+				WorkSpace/Service/Services/Strategies/FileScannerStrategy.swift,
+				WorkSpace/Service/Services/Strategies/FileUploadService.swift,
+				WorkSpace/Service/Services/Strategies/FirestoreRemoteFetch.swift,
+				WorkSpace/Service/Services/Strategies/LocalFileScanner.swift,
+				WorkSpace/Service/Services/Strategies/PosterEncoderService.swift,
+				WorkSpace/Service/Services/Strategies/ProjectCreationService.swift,
+				WorkSpace/Service/Services/Strategies/ProjectNetworkService.swift,
+				WorkSpace/Service/Services/Strategies/ProjectPersistenceService.swift,
 				WorkSpace/Service/Sync/SyncOrchestrator.swift,
 				WorkSpace/View/AddProject/NewProjectSheetView.swift,
 				WorkSpace/View/DetailedWorkSpace/AudioPlayerView.swift,
@@ -157,21 +160,23 @@
 				WorkSpace/Models/RemoteFileSnapshot.swift,
 				WorkSpace/Models/SyncStatus.swift,
 				WorkSpace/Service/FireStore/FirestoreManager.swift,
-				WorkSpace/Service/Services/BookmarkStrategy.swift,
-				WorkSpace/Service/Services/CommitApplicationStrategy.swift,
-				WorkSpace/Service/Services/CommitStorageStrategy.swift,
-				WorkSpace/Service/Services/DetailedWorkSpace/DiffEngineStrategy.swift,
-				WorkSpace/Service/Services/FilePickerService.swift,
-				WorkSpace/Service/Services/FileScannerStrategy.swift,
-				WorkSpace/Service/Services/FileUploadService.swift,
-				WorkSpace/Service/Services/FirestoreRemoteFetch.swift,
-				WorkSpace/Service/Services/LocalCommitStorageService.swift,
-				WorkSpace/Service/Services/LocalFileScanner.swift,
-				WorkSpace/Service/Services/PosterEncoderService.swift,
-				WorkSpace/Service/Services/ProjectCreationService.swift,
-				WorkSpace/Service/Services/ProjectNetworkService.swift,
-				WorkSpace/Service/Services/ProjectPersistenceService.swift,
-				WorkSpace/Service/Services/ProjectSyncService.swift,
+				WorkSpace/Service/Services/Service/LocalCommitService.swift,
+				WorkSpace/Service/Services/Service/ProjectFileService.swift,
+				WorkSpace/Service/Services/Service/ProjectSyncService.swift,
+				WorkSpace/Service/Services/Service/ProjectVersionService.swift,
+				WorkSpace/Service/Services/Strategies/BookmarkStrategy.swift,
+				WorkSpace/Service/Services/Strategies/CommitApplicationStrategy.swift,
+				WorkSpace/Service/Services/Strategies/CommitStorageStrategy.swift,
+				WorkSpace/Service/Services/Strategies/DiffEngineStrategy.swift,
+				WorkSpace/Service/Services/Strategies/FilePickerService.swift,
+				WorkSpace/Service/Services/Strategies/FileScannerStrategy.swift,
+				WorkSpace/Service/Services/Strategies/FileUploadService.swift,
+				WorkSpace/Service/Services/Strategies/FirestoreRemoteFetch.swift,
+				WorkSpace/Service/Services/Strategies/LocalFileScanner.swift,
+				WorkSpace/Service/Services/Strategies/PosterEncoderService.swift,
+				WorkSpace/Service/Services/Strategies/ProjectCreationService.swift,
+				WorkSpace/Service/Services/Strategies/ProjectNetworkService.swift,
+				WorkSpace/Service/Services/Strategies/ProjectPersistenceService.swift,
 				WorkSpace/Service/Sync/SyncOrchestrator.swift,
 				WorkSpace/View/AddProject/NewProjectSheetView.swift,
 				WorkSpace/View/DetailedWorkSpace/AudioPlayerView.swift,
@@ -632,6 +637,10 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = PS354VCTKY;
 				ENABLE_APP_SANDBOX = YES;
+				ENABLE_FILE_ACCESS_DOWNLOADS_FOLDER = readwrite;
+				ENABLE_FILE_ACCESS_MOVIES_FOLDER = readwrite;
+				ENABLE_FILE_ACCESS_MUSIC_FOLDER = readwrite;
+				ENABLE_FILE_ACCESS_PICTURE_FOLDER = readwrite;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_INCOMING_NETWORK_CONNECTIONS = YES;
 				ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES;
@@ -679,6 +688,10 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = PS354VCTKY;
 				ENABLE_APP_SANDBOX = YES;
+				ENABLE_FILE_ACCESS_DOWNLOADS_FOLDER = readwrite;
+				ENABLE_FILE_ACCESS_MOVIES_FOLDER = readwrite;
+				ENABLE_FILE_ACCESS_MUSIC_FOLDER = readwrite;
+				ENABLE_FILE_ACCESS_PICTURE_FOLDER = readwrite;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_INCOMING_NETWORK_CONNECTIONS = YES;
 				ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES;

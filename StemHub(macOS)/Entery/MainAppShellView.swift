@@ -9,12 +9,13 @@ import SwiftUI
 
 struct MainAppShellView: View {
     @ObservedObject var authVM: AuthViewModel
+    let module: WorkspaceModule  // Add module as a property
     @State private var workspaceVM: WorkspaceViewModel?
     @State private var selectedItem: String? = "Home"
     
     var body: some View {
         Group {
-            if let user = authVM.currentUser, authVM.isAuthenticated {
+            if authVM.isAuthenticated {
                 if let workspaceVM = workspaceVM {
                     NavigationSplitView {
                         List(selection: $selectedItem) {
@@ -30,16 +31,17 @@ struct MainAppShellView: View {
                 } else {
                     ProgressView()
                         .onAppear {
-                            workspaceVM = WorkspaceViewModel(currentUser: user)
+                            // Use module to create workspace VM
+                            workspaceVM = module.makeWorkspaceViewModel()
                         }
                 }
             } else {
                 EmptyView()
             }
         }
-        .onChange(of: authVM.currentUser?.id) { _, _ in
-            if let newUser = authVM.currentUser {
-                workspaceVM = WorkspaceViewModel(currentUser: newUser)
+        .onChange(of: authVM.isAuthenticated) { _, _ in
+            if authVM.isAuthenticated {
+                workspaceVM = module.makeWorkspaceViewModel()
             } else {
                 workspaceVM = nil
             }
@@ -50,7 +52,7 @@ struct MainAppShellView: View {
     private func mainContentView(workspaceVM: WorkspaceViewModel) -> some View {
         switch selectedItem {
         case "Home":
-            WorkspaceView(viewModel: workspaceVM)
+            WorkspaceView(viewModel: workspaceVM, module: module)
         case "Settings":
             SettingsView(authVM: authVM)
         default:

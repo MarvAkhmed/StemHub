@@ -20,6 +20,7 @@ protocol ProjectPersistenceStrategy {
 }
 
 
+
 struct DefaultProjectPersistenceStrategy: ProjectPersistenceStrategy {
     
     private let defaults: UserDefaults

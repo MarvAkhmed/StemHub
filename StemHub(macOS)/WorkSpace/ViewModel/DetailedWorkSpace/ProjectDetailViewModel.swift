@@ -12,21 +12,25 @@ import FirebaseFirestore
 import UniformTypeIdentifiers
 import FirebaseStorage
 
-@MainActor
 protocol ProjectDetailViewModelProtocol: ObservableObject {
+    // UI state
+    var project: Project { get }
+    var projectName: String { get }
+    var projectPosterImage: NSImage? { get }
     var versionHistory: [ProjectVersion] { get }
     var currentFiles: [MusicFile] { get }
     var selectedVersion: ProjectVersion? { get }
     var versionDiff: ProjectDiff? { get }
     var isLoading: Bool { get }
-    var errorMessage: String? { get set }
+    var errorMessage: String? { get }
     var currentBranchName: String { get }
     var currentVersionNumber: String { get }
     var showRelocationAlert: Bool { get set }
     var currentVersionID: String? { get }
-    var projectName: String { get }
-    var projectPosterImage: NSImage? { get }
+    var fileTree: [FileTreeNode] { get }
+    var isAddingFiles: Bool { get }
     
+    // Methods
     func loadVersionHistory() async
     func loadVersionDetails(versionID: String) async
     func loadFiles() async
@@ -35,142 +39,101 @@ protocol ProjectDetailViewModelProtocol: ObservableObject {
     func importAudioFiles() async
     func fixFolderPath() async
     func relocateProjectFolder() async
+    func updatePoster(_ image: NSImage) async
+    func pushAllCommits() async
+    func refreshFileTree()
 }
 
-@MainActor
 final class ProjectDetailViewModel: ProjectDetailViewModelProtocol {
     
-    // MARK: - Published Properties
-    @Published var project: Project
-    @Published var versionHistory: [ProjectVersion] = []
-    @Published var currentFiles: [MusicFile] = []
-    @Published var selectedVersion: ProjectVersion?
-    @Published var versionDiff: ProjectDiff?
-    @Published var isLoading = false
-    @Published var errorMessage: String?
-    @Published var currentBranchName = "main"
-    @Published var currentVersionNumber = "0"
-    @Published var showRelocationAlert = false
-    @Published var pendingCommit: PendingCommit?
-    @Published var fileTree: [FileTreeNode] = []
-    private var accessedFolderURL: URL?
-    
-    
-    func refreshFileTree() {
-        fileTree = buildFileTree()
-    }
-    
-    private func buildFileTree() -> [FileTreeNode] {
-        guard let folderURL = getAccessibleFolderURL() else { return [] }
-        defer { folderURL.stopAccessingSecurityScopedResource() }
-        
-        func buildNode(at url: URL) -> FileTreeNode? {
-            let isDirectory = (try? url.resourceValues(forKeys: [.isDirectoryKey]))?.isDirectory ?? false
-            var node = FileTreeNode(url: url, isDirectory: isDirectory)
-            if isDirectory {
-                do {
-                    let contents = try FileManager.default.contentsOfDirectory(at: url, includingPropertiesForKeys: nil)
-                    var childNodes: [FileTreeNode] = []
-                    for childURL in contents {
-                        if let childNode = buildNode(at: childURL) {
-                            childNodes.append(childNode)
-                        }
-                    }
-                    node.children = childNodes
-                } catch {
-                    print("Failed to read directory \(url): \(error)")
-                }
-            } else {
-                node.children = nil
-            }
-            return node
-        }
-        
-        return buildNode(at: folderURL)?.children ?? []
-    }
-    
-    var currentVersionID: String? { project.currentVersionID }
-    private var pendingTempFiles: [String: URL] = [:]
-    
-    // MARK: - Dependencies
-    private var localState: LocalProjectState
-    private let currentUserID: String?
+    // MARK: - Dependencies (all injected)
+    private let authService: AuthServiceProtocol
+    private let syncService: ProjectSyncService
+    private let versionService: ProjectVersionService
+    private let commitStorage: LocalCommitService
+    private let fileService: ProjectFileService
     private let persistence: ProjectPersistenceStrategy
     private let network: ProjectNetworkStrategy
     private let bookmark: BookmarkStrategy
     private let fileScanner: FileScannerStrategy
     
-    // MARK: - Local Commits Storage
+    // MARK: - Published State (UI)
+    @Published var project: Project
+    @Published var versionHistory: [ProjectVersion] = []
+    @Published var currentFiles: [MusicFile] = []
+    @Published var selectedVersion: ProjectVersion?
+    @Published var versionDiff: ProjectDiff?
+    @Published var errorMessage: String?
+    @Published var currentBranchName = "main"
+    @Published var currentVersionNumber = "0"
+    @Published var showRelocationAlert = false
+    @Published var fileTree: [FileTreeNode] = []
+    @Published var isLoading = false
+    @Published var isLoadingMessage = "Loading..."
+    @Published var isAddingFiles = false
+    
+    // Internal state
+    private var localState: LocalProjectState
+    private var pendingCommit: PendingCommit?
+    private var pendingTempFiles: [String: URL] = [:]
+    private var accessedFolderURL: URL?
+    
+    // Local commits storage
     private var localCommits: [LocalCommit] = []
-    private let commitsDirectory: URL
-    private let localCommitsFileURL: URL
     
-    
+    // MARK: - Computed Properties
     var projectName: String { project.name }
+    var currentVersionID: String? { project.currentVersionID }
+    private var currentUserID: String? { authService.currentUser?.id }
     
     var projectPosterImage: NSImage? {
         guard let base64 = project.posterBase64,
               let data = Data(base64Encoded: base64) else { return nil }
         return NSImage(data: data)
     }
+    
     // MARK: - Init
-    init(project: Project,
-         localState: LocalProjectState,
-         currentUserID: String?,
-         persistence: ProjectPersistenceStrategy,
-         network: ProjectNetworkStrategy,
-         bookmark: BookmarkStrategy,
-         fileScanner: FileScannerStrategy) {
+    init(
+        project: Project,
+        localState: LocalProjectState,
+        authService: AuthServiceProtocol,
+        syncService: ProjectSyncService,
+        versionService: ProjectVersionService,
+        commitStorage: LocalCommitService,
+        fileService: ProjectFileService,
+        persistence: ProjectPersistenceStrategy = DefaultProjectPersistenceStrategy(),
+        network: ProjectNetworkStrategy = DefaultProjectNetworkStrategy(),
+        bookmark: BookmarkStrategy = DefaultBookmarkStrategy(),
+        fileScanner: FileScannerStrategy = DefaultFileScannerStrategy()
+    ) {
         self.project = project
         self.localState = localState
-        self.currentUserID = currentUserID
+        self.authService = authService
+        self.syncService = syncService
+        self.versionService = versionService
+        self.commitStorage = commitStorage
+        self.fileService = fileService
         self.persistence = persistence
         self.network = network
         self.bookmark = bookmark
         self.fileScanner = fileScanner
         
-        // Setup local commits folder
-        let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
-        let baseFolder = appSupport.appendingPathComponent("StemHub/Commits", isDirectory: true)
-        try? FileManager.default.createDirectory(at: baseFolder, withIntermediateDirectories: true)
-        self.commitsDirectory = baseFolder.appendingPathComponent(project.id, isDirectory: true)
-        try? FileManager.default.createDirectory(at: commitsDirectory, withIntermediateDirectories: true)
-        
-        self.localCommitsFileURL = commitsDirectory.appendingPathComponent("local_commits.json")
-        
-        loadLocalCommits()
+        // Load local commits with cleanup
+        self.localCommits = commitStorage.loadLocalCommitsAndCleanup(projectID: project.id)
     }
     
     deinit {
         accessedFolderURL?.stopAccessingSecurityScopedResource()
     }
     
-    convenience init(project: Project,
-                     localState: LocalProjectState,
-                     currentUserID: String?) {
-        self.init(
-            project: project,
-            localState: localState,
-            currentUserID: currentUserID,
-            persistence: DefaultProjectPersistenceStrategy(),
-            network: DefaultProjectNetworkStrategy(),
-            bookmark: DefaultBookmarkStrategy(),
-            fileScanner: DefaultFileScannerStrategy()
-        )
-    }
-    
     // MARK: - Public Methods
     
     func loadVersionHistory() async {
-        isLoading = true
-        defer { isLoading = false }
+        setLoading(true)
+        defer { Task { setLoading(false) } }
         
         do {
-            let query = network.getFirestore().collection("projectVersions")
-                .whereField("projectID", isEqualTo: project.id)
-                .order(by: "versionNumber", descending: true)
-            let snapshot = try await query.getDocuments()
-            let versions = snapshot.documents.compactMap { try? $0.data(as: ProjectVersion.self) }
+            let versions = try await versionService.fetchVersionHistory(projectID: project.id)
             self.versionHistory = versions
             
             if let current = versions.first(where: { $0.id == project.currentVersionID }) {
@@ -191,29 +154,34 @@ final class ProjectDetailViewModel: ProjectDetailViewModelProtocol {
                 }
             }
         } catch {
-            errorMessage = "Failed to load version history: \(error.localizedDescription)"
+            setError("Failed to load version history: \(error.localizedDescription)")
         }
     }
     
     func loadVersionDetails(versionID: String) async {
         guard !versionID.isEmpty else { return }
-        isLoading = true
-        defer { isLoading = false }
+        setLoading(true)
+        defer { Task { setLoading(false) } }
         
         do {
-            let versionDoc = try await network.getFirestore().collection("projectVersions").document(versionID).getDocument()
-            let version = try versionDoc.data(as: ProjectVersion.self)
+            guard let version = try await versionService.fetchVersion(versionID: versionID) else {
+                setError("Version not found")
+                return
+            }
             self.selectedVersion = version
             self.versionDiff = (versionID != project.currentVersionID) ? version.diff : nil
-            await loadFilesForVersion(version)
+            self.currentFiles = try await versionService.fetchFiles(for: version)
         } catch {
-            errorMessage = "Failed to load version details: \(error.localizedDescription)"
+            setError("Failed to load version details: \(error.localizedDescription)")
         }
     }
     
     func loadFiles() async {
+        let localPath = fileService.localPath(for: project.id)
+        self.fileTree = fileService.fileTree(for: project.id, localPath: localPath)
+        
         guard let folderURL = getAccessibleFolderURL() else {
-            errorMessage = "Cannot access project folder."
+            setError("Cannot access project folder.")
             return
         }
         
@@ -231,100 +199,88 @@ final class ProjectDetailViewModel: ProjectDetailViewModelProtocol {
                     availableFormats: [],
                     createdAt: Date()
                 )
-                
             }
             refreshFileTree()
         } catch {
-            errorMessage = "Failed to load files: \(error.localizedDescription)"
+            setError("Failed to load files: \(error.localizedDescription)")
         }
     }
     
     func pullLatest() async {
-        // Prevent pull if there are unsynced local commits
         let unsynced = localCommits.filter { !$0.isPushed }
         guard unsynced.isEmpty else {
-            errorMessage = "You have \(unsynced.count) unsynced commit(s). Please push them before pulling."
+            setError("You have \(unsynced.count) unsynced commit(s). Please push them before pulling.")
             return
         }
         
         guard let branchID = localState.currentBranchID, !branchID.isEmpty else {
-            errorMessage = "No branch selected"
+            setError("No branch selected")
             return
         }
         
-        isLoading = true
-        defer { isLoading = false }
+        setLoading(true)
+        defer { Task { setLoading(false) } }
         
         do {
-            localState = try await network.pullProject(
+            let newState = try await syncService.pull(
                 projectID: project.id,
                 branchID: branchID,
-                localRootURL: URL(fileURLWithPath: localState.localPath),
-                state: localState
+                localPath: localState.localPath
             )
+            localState = newState
             persistence.setLastPulledVersionID(localState.lastPulledVersionID, for: project.id)
             await loadVersionHistory()
             await loadFiles()
         } catch {
-            errorMessage = "Pull failed: \(error.localizedDescription)"
+            setError("Pull failed: \(error.localizedDescription)")
         }
     }
     
-    // MARK: - Commit (Local only, no push)
     func commitChanges(message: String) async {
-        // 1. Validate pending commit exists
         guard let pending = pendingCommit else {
-            errorMessage = "No pending changes to commit"
+            setError("No pending changes to commit")
             return
         }
         
-        // 2. Validate user is logged in
-        guard let currentUserID = currentUserID else {
-            errorMessage = "User not logged in"
-            return
-        }
+        guard let currentUserID = getValidatedUserID() else { return }
         
-        // 3. Validate commit message is not empty
         guard !message.isEmpty else {
-            errorMessage = "Commit message cannot be empty"
+            setError("Commit message cannot be empty")
             return
         }
         
-        // 4. Check remote branch head – ensure we're committing against the latest version
         guard let branchID = localState.currentBranchID, !branchID.isEmpty else {
-            errorMessage = "No branch selected"
+            setError("No branch selected")
             return
         }
         
+        // Check remote head
         do {
             let branchDoc = try await network.getFirestore().collection("branches").document(branchID).getDocument()
             guard let branch = try? branchDoc.data(as: Branch.self),
                   let remoteHead = branch.headVersionID else {
-                errorMessage = "Cannot fetch remote branch head"
+                setError("Cannot fetch remote branch head")
                 return
             }
-            
             let lastPulled = localState.lastPulledVersionID ?? ""
             if remoteHead != lastPulled {
-                errorMessage = "Remote has new commits. Please pull latest before committing."
+                setError("Remote has new commits. Please pull latest before committing.")
                 return
             }
         } catch {
-            errorMessage = "Failed to check remote status: \(error.localizedDescription)"
+            setError("Failed to check remote status: \(error.localizedDescription)")
             return
         }
         
-        // 5. Proceed with local commit creation
-        isLoading = true
-        defer { isLoading = false }
+        setLoading(true)
+        defer { Task { setLoading(false) } }
         
         let commitID = UUID().uuidString
-        let commitCacheFolder = commitsDirectory.appendingPathComponent(commitID, isDirectory: true)
+        let commitCacheFolder = commitStorage.cacheFolder(for: project.id).appendingPathComponent(commitID, isDirectory: true)
         
         do {
             try FileManager.default.createDirectory(at: commitCacheFolder, withIntermediateDirectories: true)
             
-            // Copy temp files to permanent cache folder
             var finalSnapshots: [CommitFileSnapshot] = []
             for snapshot in pending.files {
                 guard let tempURL = pendingTempFiles[snapshot.hash] else {
@@ -335,18 +291,26 @@ final class ProjectDetailViewModel: ProjectDetailViewModelProtocol {
                 finalSnapshots.append(snapshot)
             }
             
-            // Create the Commit object
-            let commit = Commit(
-                id: commitID,
+            // Convert pending files to LocalFile array
+            let localFiles: [LocalFile] = pending.files.map { snapshot in
+                LocalFile(
+                    path: snapshot.path,
+                    name: (snapshot.path as NSString).lastPathComponent,
+                    fileExtension: (snapshot.path as NSString).pathExtension,
+                    size: 0,
+                    hash: snapshot.hash,
+                    isDirectory: false
+                )
+            }
+            
+            let commit = try await syncService.createCommit(
                 projectID: project.id,
-                parentCommitID: localState.lastCommittedID,
-                basedOnVersionID: localState.lastPulledVersionID ?? "",
-                diff: pending.diff,
-                fileSnapshot: finalSnapshots,
-                createdBy: currentUserID,
-                createdAt: Date(),
-                message: message,
-                status: .local
+                branchID: branchID,
+                localPath: localState.localPath,
+                lastPulledVersionID: localState.lastPulledVersionID,
+                files: localFiles,
+                userID: currentUserID,
+                message: message
             )
             
             let localCommit = LocalCommit(
@@ -358,160 +322,20 @@ final class ProjectDetailViewModel: ProjectDetailViewModelProtocol {
             )
             
             localCommits.append(localCommit)
-            saveLocalCommits()
+            commitStorage.saveLocalCommits(localCommits, for: project.id)
             
-            // Clear pending
             pendingCommit = nil
             pendingTempFiles.removeAll()
-            
-            // Update local state
             localState.lastCommittedID = commitID
             
             await loadFiles()
-            errorMessage = "Commit saved locally. Use 'Push' to upload."
-            
+            setError("Commit saved locally. Use 'Push' to upload.")
         } catch {
-            errorMessage = "Failed to save commit locally: \(error.localizedDescription)"
+            setError("Failed to save commit locally: \(error.localizedDescription)")
             try? FileManager.default.removeItem(at: commitCacheFolder)
         }
     }
     
-    // MARK: - Push all unsynced commits
-    
-    private func rebaseCommit(_ localCommit: LocalCommit, onto newBaseVersionID: String) async throws -> LocalCommit {
-        // 1. Fetch the new remote snapshot
-        let newRemoteSnapshot = try await network.fetchRemoteSnapshot(versionID: newBaseVersionID)
-        
-        // 2. Get local files from cached folder
-        var localFiles: [LocalFile] = []
-        for snapshot in localCommit.commit.fileSnapshot {
-            let fileURL = localCommit.cachedFolderURL.appendingPathComponent(snapshot.path)
-            let hash = LocalFileScanner.hashFile(at: fileURL)
-            let size = (try? FileManager.default.attributesOfItem(atPath: fileURL.path)[.size] as? Int64) ?? 0
-            let localFile = LocalFile(
-                path: snapshot.path,
-                name: (snapshot.path as NSString).lastPathComponent,
-                fileExtension: (snapshot.path as NSString).pathExtension,
-                size: size,
-                hash: hash,
-                isDirectory: false
-            )
-            localFiles.append(localFile)
-        }
-        
-        // 3. Compute new diff against new remote snapshot
-        let diffEngine = DefaultDiffEngineStrategy()
-        let diffResult = diffEngine.computeDiff(local: localFiles, remote: newRemoteSnapshot)
-        let newDiff = diffEngine.mapToProjectDiff(diffResult)
-        
-        // 4. Create new commit with updated basedOnVersionID
-        let newCommitID = UUID().uuidString
-        let newCommitCacheFolder = commitsDirectory.appendingPathComponent(newCommitID, isDirectory: true)
-        try FileManager.default.createDirectory(at: newCommitCacheFolder, withIntermediateDirectories: true)
-        
-        // Copy files from old cache to new cache
-        for snapshot in localCommit.commit.fileSnapshot {
-            let srcURL = localCommit.cachedFolderURL.appendingPathComponent(snapshot.path)
-            let dstURL = newCommitCacheFolder.appendingPathComponent(snapshot.path)
-            try FileManager.default.copyItem(at: srcURL, to: dstURL)
-        }
-        
-        let newCommit = Commit(
-            id: newCommitID,
-            projectID: localCommit.commit.projectID,
-            parentCommitID: localCommit.commit.parentCommitID,
-            basedOnVersionID: newBaseVersionID,   // updated base
-            diff: newDiff,
-            fileSnapshot: localCommit.commit.fileSnapshot,
-            createdBy: localCommit.commit.createdBy,
-            createdAt: Date(),
-            message: localCommit.commit.message,
-            status: .local
-        )
-        
-        let rebasedLocalCommit = LocalCommit(
-            id: newCommitID,
-            commit: newCommit,
-            cachedFolderURL: newCommitCacheFolder,
-            isPushed: false,
-            createdAt: Date()
-        )
-        
-        // Remove old commit
-        try? FileManager.default.removeItem(at: localCommit.cachedFolderURL)
-        return rebasedLocalCommit
-    }
-    
-    func pushAllCommits() async {
-        let unsynced = localCommits.filter { !$0.isPushed }
-        guard !unsynced.isEmpty else { return }
-        
-        isLoading = true
-        defer { isLoading = false }
-        
-        guard let branchID = localState.currentBranchID, !branchID.isEmpty else {
-            errorMessage = "No branch selected"
-            return
-        }
-        
-        var currentUnsynced = unsynced
-        var index = 0
-        
-        while index < currentUnsynced.count {
-            let localCommit = currentUnsynced[index]
-            do {
-                let newVersion = try await network.pushCommit(
-                    localCommit.commit,
-                    localRootURL: localCommit.cachedFolderURL,
-                    branchID: branchID
-                )
-                
-                // Success
-                localState.lastPulledVersionID = newVersion.id
-                persistence.setLastPulledVersionID(newVersion.id, for: project.id)
-                localState.lastCommittedID = localCommit.commit.id
-                
-                if let idx = localCommits.firstIndex(where: { $0.id == localCommit.id }) {
-                    localCommits[idx].isPushed = true
-                }
-                try? FileManager.default.removeItem(at: localCommit.cachedFolderURL)
-                print("🗑️ Removed cache folder: \(localCommit.cachedFolderURL.path)")
-                saveLocalCommits()
-                await loadVersionHistory()
-                await loadFiles()
-                
-                index += 1
-                
-            } catch SyncError.outdatedCommit {
-                do {
-                    let branchDoc = try await network.getFirestore().collection("branches").document(branchID).getDocument()
-                    guard let branch = try? branchDoc.data(as: Branch.self),
-                          let newHead = branch.headVersionID else {
-                        throw NSError(domain: "Cannot fetch remote head", code: -1)
-                    }
-                    
-                    let rebased = try await rebaseCommit(localCommit, onto: newHead)
-                    
-                    if let idx = localCommits.firstIndex(where: { $0.id == localCommit.id }) {
-                        localCommits[idx] = rebased
-                    }
-                    saveLocalCommits()
-                    currentUnsynced[index] = rebased
-                    // Retry same index
-                } catch {
-                    errorMessage = "Rebase failed: \(error.localizedDescription)"
-                    return
-                }
-            } catch {
-                errorMessage = "Push failed for commit \(localCommit.id): \(error.localizedDescription)"
-                return
-            }
-        }
-        
-        errorMessage = "All commits pushed successfully!"
-    }
-    
-    // MARK: - Import (stage files)
     func importAudioFiles() async {
         let panel = NSOpenPanel()
         panel.allowedContentTypes = [.audio, .mp3, .wav, .aiff]
@@ -524,7 +348,6 @@ final class ProjectDetailViewModel: ProjectDetailViewModelProtocol {
         var tempURLs: [String: URL] = [:]
         
         for url in panel.urls {
-            // Create a temporary copy
             let tempDir = FileManager.default.temporaryDirectory
             let tempURL = tempDir.appendingPathComponent(UUID().uuidString).appendingPathExtension(url.pathExtension)
             try? FileManager.default.copyItem(at: url, to: tempURL)
@@ -539,7 +362,7 @@ final class ProjectDetailViewModel: ProjectDetailViewModelProtocol {
             do {
                 remoteSnapshot = try await network.fetchRemoteSnapshot(versionID: lastPulledID)
             } catch {
-                errorMessage = "Failed to fetch remote snapshot: \(error.localizedDescription)"
+                setError("Failed to fetch remote snapshot: \(error.localizedDescription)")
                 return
             }
         }
@@ -565,18 +388,8 @@ final class ProjectDetailViewModel: ProjectDetailViewModelProtocol {
         )
         self.pendingTempFiles = tempURLs
         
-        await loadFiles() // UI refresh
-        errorMessage = "\(localFiles.count) file(s) staged. Write a commit message and click Commit."
-    }
-    
-    private func setupPanel() -> NSOpenPanel? {
-        let panel = NSOpenPanel()
-        panel.allowedContentTypes = [.audio, .mp3, .wav, .aiff]
-        panel.allowsMultipleSelection = true
-        panel.canChooseDirectories = false
-        panel.title = "Select Audio Files"
-        guard panel.runModal() == .OK else { return nil }
-        return panel
+        await loadFiles()
+        setError("\(localFiles.count) file(s) staged. Write a commit message and click Commit.")
     }
     
     func fixFolderPath() async {
@@ -588,7 +401,7 @@ final class ProjectDetailViewModel: ProjectDetailViewModelProtocol {
         
         do {
             let bookmarkData = try bookmark.createBookmark(for: newURL)
-            persistence.storeBookmark(data: bookmarkData, for: project.id)
+            fileService.saveBookmark(bookmarkData, for: project.id)
             persistence.setLocalPath(newURL.path, for: project.id)
             
             localState = LocalProjectState(
@@ -599,9 +412,9 @@ final class ProjectDetailViewModel: ProjectDetailViewModelProtocol {
                 currentBranchID: localState.currentBranchID
             )
             await loadFiles()
-            errorMessage = nil
+            setError(nil)
         } catch {
-            errorMessage = "Failed to update folder path: \(error.localizedDescription)"
+            setError("Failed to update folder path: \(error.localizedDescription)")
         }
     }
     
@@ -626,9 +439,8 @@ final class ProjectDetailViewModel: ProjectDetailViewModelProtocol {
             }
             try FileManager.default.moveItem(at: oldURL, to: newFolderURL)
             let bookmarkData = try bookmark.createBookmark(for: newFolderURL)
-            persistence.storeBookmark(data: bookmarkData, for: project.id)
+            fileService.saveBookmark(bookmarkData, for: project.id)
             persistence.setLocalPath(newFolderURL.path, for: project.id)
-            
             
             localState = LocalProjectState(
                 projectID: project.id,
@@ -638,124 +450,11 @@ final class ProjectDetailViewModel: ProjectDetailViewModelProtocol {
                 currentBranchID: localState.currentBranchID
             )
             await loadFiles()
-            errorMessage = nil
+            setError(nil)
             showRelocationAlert = false
         } catch {
-            errorMessage = "Failed to relocate: \(error.localizedDescription)"
+            setError("Failed to relocate: \(error.localizedDescription)")
             showRelocationAlert = false
-        }
-    }
-    
-    // MARK: - Private Helpers
-    
-    private func loadFilesForVersion(_ version: ProjectVersion) async {
-        var files: [MusicFile] = []
-        for fileVersionID in version.fileVersionIDs {
-            guard !fileVersionID.isEmpty else { continue }
-            do {
-                let fvDoc = try await network.getFirestore().collection("fileVersions").document(fileVersionID).getDocument()
-                let fileVersion = try fvDoc.data(as: FileVersion.self)
-                let musicFile = MusicFile(
-                    id: fileVersion.fileID,
-                    projectID: project.id,
-                    name: (fileVersion.path as NSString).lastPathComponent,
-                    fileExtension: (fileVersion.path as NSString).pathExtension,
-                    path: fileVersion.path,
-                    capabilities: .playable,
-                    currentVersionID: fileVersion.id,
-                    availableFormats: [],
-                    createdAt: fileVersion.createdAt
-                )
-                files.append(musicFile)
-            } catch {
-                print("Failed to load file version \(fileVersionID): \(error)")
-            }
-        }
-        self.currentFiles = files
-    }
-    
-    private func getAccessibleFolderURL() -> URL? {
-        if let url = accessedFolderURL {
-            return url
-        }
-        guard let bookmarkData = UserDefaults.standard.data(forKey: "project_\(project.id)_bookmark") else {
-            let url = URL(fileURLWithPath: localState.localPath)
-            accessedFolderURL = url
-            return url
-        }
-        var isStale = false
-        do {
-            let url = try URL(resolvingBookmarkData: bookmarkData,
-                              options: .withSecurityScope,
-                              relativeTo: nil,
-                              bookmarkDataIsStale: &isStale)
-            if isStale {
-                Task { await refreshBookmark() }
-                return nil
-            }
-            let didStart = url.startAccessingSecurityScopedResource()
-            if !didStart {
-                print("Failed to start accessing security-scoped resource")
-                return nil
-            }
-            accessedFolderURL = url
-            return url
-        } catch {
-            print("Bookmark resolution error: \(error)")
-            return nil
-        }
-    }
-    
-//    private func getAccessibleFolderURL() -> URL? {
-//        guard let bookmarkData = UserDefaults.standard.data(forKey: "project_\(project.id)_bookmark") else {
-//            return URL(fileURLWithPath: localState.localPath)
-//        }
-//        var isStale = false
-//        do {
-//            let url = try URL(resolvingBookmarkData: bookmarkData,
-//                              options: .withSecurityScope,
-//                              relativeTo: nil,
-//                              bookmarkDataIsStale: &isStale)
-//            if isStale {
-//                Task { await refreshBookmark() }
-//                return nil
-//            }
-//            // ✅ MUST call this before accessing the folder
-//            let didStart = url.startAccessingSecurityScopedResource()
-//            if !didStart {
-//                print("Failed to start accessing security-scoped resource")
-//                return nil
-//            }
-//            return url
-//        } catch {
-//            print("Bookmark resolution error: \(error)")
-//            return nil
-//        }
-//    }
-    
-    private func refreshBookmark() async {
-        let panel = NSOpenPanel()
-        panel.canChooseDirectories = true
-        panel.canChooseFiles = false
-        panel.title = "Select the project folder again"
-        guard panel.runModal() == .OK, let newFolderURL = panel.url else { return }
-        do {
-            
-            let bookmarkData = try bookmark.createBookmark(for: newFolderURL)
-            persistence.storeBookmark(data: bookmarkData, for: project.id)
-            
-            persistence.setLocalPath(newFolderURL.path, for: project.id)
-            localState = LocalProjectState(
-                projectID: project.id,
-                localPath: newFolderURL.path,
-                lastPulledVersionID: localState.lastPulledVersionID,
-                lastCommittedID: localState.lastCommittedID,
-                currentBranchID: localState.currentBranchID
-            )
-            await loadFiles()
-            errorMessage = nil
-        } catch {
-            errorMessage = "Failed to save new bookmark: \(error.localizedDescription)"
         }
     }
     
@@ -763,7 +462,7 @@ final class ProjectDetailViewModel: ProjectDetailViewModelProtocol {
         guard let tiffData = image.tiffRepresentation,
               let bitmap = NSBitmapImageRep(data: tiffData),
               let jpegData = bitmap.representation(using: .jpeg, properties: [.compressionFactor: 0.7]) else {
-            errorMessage = "Failed to process image"
+            setError("Failed to process image")
             return
         }
         let base64 = jpegData.base64EncodedString()
@@ -774,94 +473,113 @@ final class ProjectDetailViewModel: ProjectDetailViewModelProtocol {
                 .document(project.id)
                 .updateData(["posterBase64": base64])
             
-            // Update local project
             var updatedProject = project
             updatedProject.posterBase64 = base64
             project = updatedProject
-            await loadFiles() // refresh UI (optional)
+            await loadFiles()
         } catch {
-            errorMessage = "Failed to update poster: \(error.localizedDescription)"
+            setError("Failed to update poster: \(error.localizedDescription)")
         }
     }
     
-    private func loadLocalCommits() {
-        guard let data = try? Data(contentsOf: localCommitsFileURL),
-              let commits = try? JSONDecoder().decode([LocalCommit].self, from: data) else {
-            localCommits = []
+    func pushAllCommits() async {
+        let unsynced = localCommits.filter { !$0.isPushed }
+        guard !unsynced.isEmpty else { return }
+        
+        setLoading(true)
+        defer { Task { setLoading(false) } }
+        
+        guard let branchID = localState.currentBranchID, !branchID.isEmpty else {
+            setError("No branch selected")
             return
         }
-        localCommits = commits
-    }
-    
-    private func saveLocalCommits() {
-        guard let data = try? JSONEncoder().encode(localCommits) else { return }
-        try? data.write(to: localCommitsFileURL)
-    }
-    
-    private func ensureBlobExists(blobID: String, fileURL: URL) async throws {
-        let db = Firestore.firestore()
-        let blobRef = db.collection("blobs").document(blobID)
-        let snapshot = try await blobRef.getDocument()
-        if !snapshot.exists {
-            let storageRef = Storage.storage().reference().child("blobs/\(blobID)")
-            _ = try await storageRef.putFileAsync(from: fileURL)
-            let size = (try? FileManager.default.attributesOfItem(atPath: fileURL.path)[.size] as? Int64) ?? 0
-            let blob = FileBlob(id: blobID, storagePath: storageRef.fullPath, size: size, hash: blobID, createdAt: Date())
-            try blobRef.setData(from: blob)
+        
+        var currentUnsynced = unsynced
+        var index = 0
+        
+        while index < currentUnsynced.count {
+            let localCommit = currentUnsynced[index]
+            do {
+                let newVersion = try await syncService.pushCommit(
+                    localCommit.commit,
+                    branchID: branchID,
+                    localRootURL: localCommit.cachedFolderURL
+                )
+                
+                localState.lastPulledVersionID = newVersion.id
+                persistence.setLastPulledVersionID(newVersion.id, for: project.id)
+                localState.lastCommittedID = localCommit.commit.id
+                
+                if let idx = localCommits.firstIndex(where: { $0.id == localCommit.id }) {
+                    localCommits[idx].isPushed = true
+                }
+                try? FileManager.default.removeItem(at: localCommit.cachedFolderURL)
+                commitStorage.saveLocalCommits(localCommits, for: project.id)
+                await loadVersionHistory()
+                await loadFiles()
+                
+                index += 1
+            } catch SyncError.outdatedCommit {
+                do {
+                    let branchDoc = try await network.getFirestore().collection("branches").document(branchID).getDocument()
+                    guard let branch = try? branchDoc.data(as: Branch.self),
+                          let newHead = branch.headVersionID else {
+                        throw NSError(domain: "Cannot fetch remote head", code: -1)
+                    }
+                    let rebased = try await syncService.rebaseCommit(localCommit, onto: newHead, projectID: project.id)
+                    if let idx = localCommits.firstIndex(where: { $0.id == localCommit.id }) {
+                        localCommits[idx] = rebased
+                    }
+                    commitStorage.saveLocalCommits(localCommits, for: project.id)
+                    currentUnsynced[index] = rebased
+                } catch {
+                    setError("Rebase failed: \(error.localizedDescription)")
+                    return
+                }
+            } catch {
+                setError("Push failed for commit \(localCommit.id): \(error.localizedDescription)")
+                return
+            }
         }
+        setError("All commits pushed successfully!")
     }
     
-//    func buildNode(at url: URL) -> FileTreeNode? {
-//        let isDirectory = (try? url.resourceValues(forKeys: [.isDirectoryKey]))?.isDirectory ?? false
-//        var node = FileTreeNode(url: url, isDirectory: isDirectory)
-//        if isDirectory {
-//            do {
-//                let contents = try FileManager.default.contentsOfDirectory(at: url, includingPropertiesForKeys: nil)
-//                var childNodes: [FileTreeNode] = []
-//                for childURL in contents {
-//                    if let childNode = buildNode(at: childURL) {
-//                        childNodes.append(childNode)
-//                    }
-//                }
-//                node.children = childNodes   // assign non‑nil only for directories
-//            } catch {
-//                print("Failed to read directory \(url): \(error)")
-//            }
-//        } else {
-//            node.children = nil
-//        }
-//        return node
-//    }
+    func refreshFileTree() {
+        let localPath = fileService.localPath(for: project.id)
+        fileTree = fileService.fileTree(for: project.id, localPath: localPath)
+    }
     
-//    private func getAccessibleFolderURL() -> URL? {
-//        if let url = accessedFolderURL {
-//            return url
-//        }
-//        guard let bookmarkData = UserDefaults.standard.data(forKey: "project_\(project.id)_bookmark") else {
-//            let url = URL(fileURLWithPath: localState.localPath)
-//            accessedFolderURL = url
-//            return url
-//        }
-//        var isStale = false
-//        do {
-//            let url = try URL(resolvingBookmarkData: bookmarkData,
-//                              options: .withSecurityScope,
-//                              relativeTo: nil,
-//                              bookmarkDataIsStale: &isStale)
-//            if isStale {
-//                Task { await refreshBookmark() }
-//                return nil
-//            }
-//            let didStart = url.startAccessingSecurityScopedResource()
-//            if !didStart {
-//                print("Failed to start accessing security-scoped resource")
-//                return nil
-//            }
-//            accessedFolderURL = url
-//            return url
-//        } catch {
-//            print("Bookmark resolution error: \(error)")
-//            return nil
-//        }
-//    }
+    // MARK: - Private Helpers
+    
+    private func getAccessibleFolderURL() -> URL? {
+        if let url = accessedFolderURL {
+            return url
+        }
+        let bookmarkData = UserDefaults.standard.data(forKey: "project_\(project.id)_bookmark")
+        let localPath = fileService.localPath(for: project.id)
+        let url = fileService.accessibleFolderURL(for: project.id, bookmarkData: bookmarkData, localPath: localPath)
+        accessedFolderURL = url
+        return url
+    }
+    
+    private func getValidatedUserID() -> String? {
+        guard let userID = currentUserID else {
+            Task { setError("User not logged in") }
+            return nil
+        }
+        return userID
+    }
+    
+    // MARK: - UI Helpers
+    
+    @MainActor
+    private func setLoading(_ loading: Bool, message: String = "Loading...") {
+        isLoading = loading
+        isLoadingMessage = message
+    }
+    
+    @MainActor
+    private func setError(_ message: String?) {
+        errorMessage = message
+    }
 }

@@ -139,9 +139,9 @@ final class FirestoreManager {
             id: UUID().uuidString,
             projectID: project.id,
             parentCommitID: nil,
-            basedOnVersionID: "",                       // no base version yet
-            diff: ProjectDiff(files: []),               // empty diff
-            fileSnapshot: [],                           // no files
+            basedOnVersionID: "",
+            diff: ProjectDiff(files: []),
+            fileSnapshot: [],      
             createdBy: userID,
             createdAt: Date(),
             message: "Initial empty commit",

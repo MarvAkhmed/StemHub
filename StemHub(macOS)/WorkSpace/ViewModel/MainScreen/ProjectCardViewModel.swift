@@ -8,8 +8,17 @@
 import Combine
 import SwiftUI
 
-@MainActor
-final class ProjectCardViewModel: ObservableObject {
+protocol ProjectCardViewModelProtocol: ObservableObject {
+    var project: Project { get }
+    var name: String { get }
+    var projectPosterImage: NSImage? { get }
+    var updatedAtFormatted: String { get }
+    var bandIDPrefix: String { get }
+    var versionPrefix: String { get }
+    var posterURL: URL? { get }
+}
+
+final class ProjectCardViewModel: ProjectCardViewModelProtocol {
     @Published var project: Project
     var name: String { project.name }
     
@@ -34,6 +43,4 @@ final class ProjectCardViewModel: ObservableObject {
     init(project: Project) {
         self.project = project
     }
-    
-    
 }

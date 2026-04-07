@@ -11,7 +11,7 @@ import Foundation
 struct AppAssembler {
     private let authModule: AuthModule
     private let workspaceModule: WorkspaceModule
-    
+    private let authService: AuthServiceProtocol
     
     init() {
         let emailProvider = FirebaseEmailAuthProvider()
@@ -23,7 +23,7 @@ struct AppAssembler {
             userDefaultsManager: UserDefaultsManager.shared
         )
         
-        let authService = AuthService(
+        self.authService = AuthService(
             emailProvider: emailProvider,
             googleProvider: googleProvider,
             sessionManager: sessionManager,
@@ -32,7 +32,7 @@ struct AppAssembler {
         )
         
         self.authModule = AuthModule(authService: authService)
-        self.workspaceModule = WorkspaceModule()
+        self.workspaceModule = WorkspaceModule(authService: authService)
     }
     
     func makeAuthViewModel() -> AuthViewModel {
@@ -47,16 +47,16 @@ struct AppAssembler {
         authModule.makeTermsViewModel()
     }
     
-    func makeWorkspaceViewModel(for user: User) -> WorkspaceViewModel {
-        workspaceModule.makeWorkspaceViewModel(currentUser: user)
+    func makeWorkspaceViewModel() -> WorkspaceViewModel {
+        workspaceModule.makeWorkspaceViewModel()
     }
     
     func makeProjectDetailViewModel(project: Project,
-                                    localState: LocalProjectState,
-                                    currentUserID: String?) -> ProjectDetailViewModel? {
-        guard let currentUserID else { return nil }
-        return workspaceModule.makeProjectDetailViewModel(project: project,
-                                                          localState: localState,
-                                                          currentUserID: currentUserID)
+                                    localState: LocalProjectState) -> ProjectDetailViewModel {
+        workspaceModule.makeProjectDetailViewModel(project: project, localState: localState)
+    }
+    
+    func getWorkspaceModule() -> WorkspaceModule {
+        workspaceModule
     }
 }

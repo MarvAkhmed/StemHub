@@ -11,26 +11,36 @@ import Combine
 
 struct ProjectDetailView: View {
     @StateObject var viewModel: ProjectDetailViewModel
+    
     @State private var selectedVersionID: String?
     @State private var showingCommitSheet = false
     @State private var commitMessage = ""
-
     @State private var selectedFileURL: URL?
     @State private var selectedAudioURL: URL?
     
-    init(project: Project, localState: LocalProjectState, currentUserID: String?) {
+    init(project: Project,
+         localState: LocalProjectState,
+         authService: AuthServiceProtocol,
+         syncService: ProjectSyncService,
+         versionService: ProjectVersionService,
+         commitStorage: LocalCommitService,
+         fileService: ProjectFileService) {
         _viewModel = StateObject(wrappedValue: ProjectDetailViewModel(
             project: project,
             localState: localState,
-            currentUserID: currentUserID
+            authService: authService,
+            syncService: syncService,
+            versionService: versionService,
+            commitStorage: commitStorage,
+            fileService: fileService
         ))
     }
-
+    
     var body: some View {
         VStack(spacing: 0) {
             headerView
             Divider()
-
+            
             HSplitView {
                 versionHistorySidebar
                     .frame(minWidth: 250, idealWidth: 280)
@@ -56,15 +66,10 @@ struct ProjectDetailView: View {
             Text(viewModel.errorMessage ?? "")
         }
     }
-
-    func isDirectory(url: URL) -> Bool {
-        (try? url.resourceValues(forKeys: [.isDirectoryKey]))?.isDirectory ?? false
-    }
     
     // MARK: - Header
     private var headerView: some View {
         HStack {
-            // Poster
             if let image = viewModel.projectPosterImage {
                 Image(nsImage: image)
                     .resizable()
@@ -78,7 +83,7 @@ struct ProjectDetailView: View {
                     .frame(width: 80, height: 80)
                     .overlay(Image(systemName: "music.note").font(.title).foregroundColor(.gray))
             }
-
+            
             VStack(alignment: .leading, spacing: 4) {
                 Text(viewModel.projectName)
                     .font(.largeTitle)
@@ -90,9 +95,9 @@ struct ProjectDetailView: View {
                 .font(.caption)
                 .foregroundColor(.secondary)
             }
-
+            
             Spacer()
-
+            
             if viewModel.isLoading {
                 ProgressView().padding()
             }
@@ -100,7 +105,7 @@ struct ProjectDetailView: View {
         .padding()
         .background(Color(NSColor.windowBackgroundColor))
     }
-
+    
     // MARK: - Version History Sidebar
     private var versionHistorySidebar: some View {
         List(selection: $selectedVersionID) {
@@ -122,7 +127,7 @@ struct ProjectDetailView: View {
                     .padding(.vertical, 4)
                 }
                 .buttonStyle(PlainButtonStyle())
-
+                
                 ForEach(viewModel.versionHistory) { version in
                     VersionRowView(version: version, isSelected: selectedVersionID == version.id)
                         .tag(version.id)
@@ -135,9 +140,8 @@ struct ProjectDetailView: View {
         }
         .listStyle(SidebarListStyle())
     }
-
-   
-//     MARK: - Main Content (File Browser + Diff)
+    
+    // MARK: - Main Content
     private var mainContentView: some View {
         VStack(alignment: .leading, spacing: 12) {
             if let selectedVersion = viewModel.selectedVersion {
@@ -165,11 +169,11 @@ struct ProjectDetailView: View {
                 .padding(.top)
                 Divider()
             }
-
+            
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: 4) {
                     ForEach(viewModel.fileTree) { node in
-                        FileTreePlayerNodeView(node: node)
+                        FileTreePlayerNodeView(node: node, selectedFileURL: $selectedFileURL)
                     }
                     if viewModel.fileTree.isEmpty {
                         Text("No files or folders found.")
@@ -179,7 +183,7 @@ struct ProjectDetailView: View {
                 }
                 .padding()
             }
-
+            
             if let diff = viewModel.versionDiff,
                selectedVersionID != nil && selectedVersionID != viewModel.currentVersionID {
                 Divider()
@@ -194,36 +198,6 @@ struct ProjectDetailView: View {
         }
     }
     
-//    private var mainContentView: some View {
-//        HSplitView {
-//            // Left: File tree
-//            FileTreeView(nodes: viewModel.fileTree, selectedFileURL: $selectedFileURL)
-//                .frame(minWidth: 250, idealWidth: 300)
-//                .onReceive(Just(selectedFileURL)) { newURL in
-//                    if let url = newURL, !self.isDirectory(url: url) {
-//                        selectedAudioURL = url
-//                    }
-//                }
-//            
-//            // Right: Audio player / empty state
-//            VStack {
-//                if let audioURL = selectedAudioURL {
-//                    AudioPlayerView(url: audioURL)
-//                        .padding()
-//                    Spacer()
-//                } else {
-//                    ContentUnavailableView(
-//                        "No Audio Selected",
-//                        systemImage: "music.note.list",
-//                        description: Text("Select an audio file from the left panel to play it.")
-//                    )
-//                }
-//            }
-//            .frame(minWidth: 300)
-//            .background(Color(NSColor.textBackgroundColor))
-//        }
-//    }
-
     // MARK: - Toolbar
     @ToolbarContentBuilder
     private var toolbarContent: some ToolbarContent {
@@ -237,14 +211,12 @@ struct ProjectDetailView: View {
             Button(action: { Task { await viewModel.importAudioFiles() } }) {
                 Label("Add Files", systemImage: "plus.circle")
             }
-        
             Button(action: { Task { await selectAndUpdatePoster() } }) {
                 Label("Set Poster", systemImage: "photo")
             }
             Button(action: { Task { await viewModel.loadVersionHistory() } }) {
                 Label("Refresh", systemImage: "arrow.clockwise")
             }
-            
             Button(action: { Task { await viewModel.fixFolderPath() } }) {
                 Label("Fix Path", systemImage: "folder.badge.gearshape")
             }
@@ -253,7 +225,7 @@ struct ProjectDetailView: View {
             }
         }
     }
-
+    
     // MARK: - Commit Sheet
     private var commitSheet: some View {
         VStack(spacing: 20) {
@@ -280,7 +252,7 @@ struct ProjectDetailView: View {
         .frame(width: 400, height: 200)
     }
     
-    
+    // MARK: - Private Methods
     private func selectAndUpdatePoster() async {
         let panel = NSOpenPanel()
         panel.allowedContentTypes = [.png, .jpeg]
@@ -290,3 +262,7 @@ struct ProjectDetailView: View {
         await viewModel.updatePoster(image)
     }
 }
+
+
+
+

@@ -8,7 +8,8 @@
 import SwiftUI
 
 struct WorkspaceView: View {
-    @ObservedObject var viewModel: WorkspaceViewModel
+    @ObservedObject var viewModel: WorkspaceViewModel 
+    let module: WorkspaceModule
     @State private var showNewProjectSheet = false
     
     private let columns = [
@@ -33,7 +34,11 @@ struct WorkspaceView: View {
                 ProjectDetailView(
                     project: project,
                     localState: state,
-                    currentUserID: viewModel.currentUserID
+                    authService: module.getAuthService(),
+                    syncService: module.getSyncService(),
+                    versionService: module.getVersionService(),
+                    commitStorage: module.getCommitStorage(),
+                    fileService: module.getFileService()
                 )
             }
             .task {
@@ -41,7 +46,7 @@ struct WorkspaceView: View {
             }
             .alert("Error", isPresented: Binding(
                 get: { viewModel.errorMessage != nil },
-                set: { if !$0 { viewModel.errorMessage = nil } }
+                set: { _, _ in }  // Fixed: can't assign to get-only property
             )) {
                 Button("OK") { }
             } message: {
@@ -80,7 +85,7 @@ struct WorkspaceView: View {
     }
     
     @ViewBuilder
-    private func projectsGridView() ->  some View {
+    private func projectsGridView() -> some View {
         LazyVGrid(columns: columns, spacing: 24) {
             ForEach(viewModel.projects) { project in
                 NavigationLink(value: project) {

@@ -27,11 +27,14 @@ struct EnteryViewMacOS<SVM: SocialLoginViewModelProtocol,
                 LoadingView(message: "Checking your session...")
             } else if let _ = authorizationViewModel.currentUser,
                       authorizationViewModel.isAuthenticated {
-                MainAppShellView(authVM: authorizationViewModel)
-                    .loadingOverlay(
-                        isLoading: authorizationViewModel.isLoading,
-                        message: authorizationViewModel.isLoadingMessage
-                    )
+                MainAppShellView(
+                    authVM: authorizationViewModel,
+                    module: assembler.getWorkspaceModule()  // Pass the module
+                )
+                .loadingOverlay(
+                    isLoading: authorizationViewModel.isLoading,
+                    message: authorizationViewModel.isLoadingMessage
+                )
             } else {
                 buildLaunchScreen()
                     .loadingOverlay(
@@ -65,6 +68,3 @@ struct EnteryViewMacOS<SVM: SocialLoginViewModelProtocol,
         }
     }
 }
-
-
-

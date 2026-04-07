@@ -13,10 +13,10 @@ protocol CommitApplicationStrategy {
 
 final class DefaultCommitApplicationStrategy: CommitApplicationStrategy {
     let network: ProjectNetworkStrategy
-    let commitStorage: LocalCommitStorageStrategy
+    let commitStorage: LocalCommitService
     let diffEngine: DiffEngineStrategy
     
-    init(network: ProjectNetworkStrategy, commitStorage: LocalCommitStorageStrategy, diffEngine: DiffEngineStrategy) {
+    init(network: ProjectNetworkStrategy, commitStorage: LocalCommitService, diffEngine: DiffEngineStrategy) {
         self.network = network
         self.commitStorage = commitStorage
         self.diffEngine = diffEngine
