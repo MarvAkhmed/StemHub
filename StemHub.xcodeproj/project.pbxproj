@@ -7,11 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		C51E9A602F84B99600B94561 /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = C574AD102F82302800FBA2E7 /* FirebaseCore */; };
 		C574AD072F822FD300FBA2E7 /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = C574AD062F822FD300FBA2E7 /* GoogleSignIn */; };
 		C574AD092F822FD300FBA2E7 /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = C574AD082F822FD300FBA2E7 /* GoogleSignInSwift */; };
 		C574AD0D2F82301B00FBA2E7 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = C574AD0C2F82301B00FBA2E7 /* FirebaseAuth */; };
 		C574AD0F2F82302100FBA2E7 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = C574AD0E2F82302100FBA2E7 /* FirebaseFirestore */; };
-		C574AD112F82302800FBA2E7 /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = C574AD102F82302800FBA2E7 /* FirebaseCore */; };
 		C574AD6B2F82310900FBA2E7 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = C574AD6A2F82310900FBA2E7 /* FirebaseFirestore */; };
 		C574AD6D2F82311000FBA2E7 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = C574AD6C2F82311000FBA2E7 /* FirebaseAuth */; };
 		C574AD6F2F82311500FBA2E7 /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = C574AD6E2F82311500FBA2E7 /* FirebaseCore */; };
@@ -21,48 +21,30 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		C574A87E2F81CF7F00FBA2E7 /* StemHub.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = StemHub.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		C574A87E2F81CF7F00FBA2E7 /* StemHub(iOS).app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "StemHub(iOS).app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		C574A9382F81CFB500FBA2E7 /* StemHub.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = StemHub.xcodeproj; sourceTree = "<group>"; };
 		C574AD162F82308F00FBA2E7 /* StemHub(macOS).app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "StemHub(macOS).app"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		C50FCEC92F84D98B00A6C0A8 /* Exceptions for "StemHub(iOS)" folder in "StemHub(iOS)" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				"Resources/StemHub_iOS-Info.plist",
+			);
+			target = C574A87D2F81CF7F00FBA2E7 /* StemHub(iOS) */;
+		};
 		C51BD6FB2F8257AA00C7E108 /* Exceptions for "StemHub(macOS)" folder in "StemHub(macOS)" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				Entery/AppAssembler.swift,
+				Entery/EnteryViewMacOS.swift,
+				Entery/MainAppShellView.swift,
+				Entery/Modules/WorkspaceModule.swift,
+				Entery/StemHub_macOS_App.swift,
+				Resources/Extentions/View.swift,
+				"Resources/GoogleService-Info.plist",
 				Settings/SettingsView.swift,
-				TabBar/EnteryViewMacOS.swift,
-				TabBar/MainAppShellView.swift,
-				TabBar/StemHub_macOS_App.swift,
-				WorkSpace/AddProject/Service/DefaultFilePickerService.swift,
-				WorkSpace/AddProject/Service/FilePickerService.swift,
-				WorkSpace/AddProject/View/NewProjectSheetView.swift,
-				WorkSpace/AddProject/ViewModel/NewProjectSheetViewModel.swift,
-				WorkSpace/DetailedWorkSpace/Service/DefaultFileScannerStrategy.swift,
-				WorkSpace/DetailedWorkSpace/Service/FileScannerStrategy.swift,
-				WorkSpace/DetailedWorkSpace/ViewModels/ProjectDetailViewModel.swift,
-				WorkSpace/DetailedWorkSpace/Views/AudioPlayerView.swift,
-				WorkSpace/DetailedWorkSpace/Views/DiffChangeRow.swift,
-				WorkSpace/DetailedWorkSpace/Views/DiffPreviewView.swift,
-				WorkSpace/DetailedWorkSpace/Views/FileRowView.swift,
-				WorkSpace/DetailedWorkSpace/Views/FileTreePlayerNodeView.swift,
-				WorkSpace/DetailedWorkSpace/Views/FileTreeView.swift,
-				WorkSpace/DetailedWorkSpace/Views/ProjectDetailView.swift,
-				WorkSpace/DetailedWorkSpace/Views/VersionRowView.swift,
-				WorkSpace/MainScreen/ViewModels/ProjectCardViewModel.swift,
-				WorkSpace/MainScreen/ViewModels/Protocols/BookmarkStrategy.swift,
-				WorkSpace/MainScreen/ViewModels/Protocols/ProjectNetworkStrategy.swift,
-				WorkSpace/MainScreen/ViewModels/Protocols/ProjectPersistenceStrategy.swift,
-				WorkSpace/MainScreen/ViewModels/Protocols/ProjectSyncStrategy.swift,
-				WorkSpace/MainScreen/ViewModels/Strategies/BookmarkService.swift,
-				WorkSpace/MainScreen/ViewModels/Strategies/ProjectNetworkService.swift,
-				WorkSpace/MainScreen/ViewModels/Strategies/ProjectPersistenceService.swift,
-				WorkSpace/MainScreen/ViewModels/Strategies/ProjectSyncService.swift,
-				WorkSpace/MainScreen/ViewModels/WorkspaceViewModel.swift,
-				WorkSpace/MainScreen/Views/EmptyStateView.swift,
-				WorkSpace/MainScreen/Views/NewProjectCard.swift,
-				WorkSpace/MainScreen/Views/ProjectCard.swift,
-				WorkSpace/MainScreen/Views/WorkspaceView.swift,
 				"WorkSpace/Models/ FileTreeNode.swift",
 				WorkSpace/Models/Band.swift,
 				WorkSpace/Models/Branch.swift,
@@ -73,7 +55,12 @@
 				WorkSpace/Models/DiffResult.swift,
 				WorkSpace/Models/FileBlob.swift,
 				WorkSpace/Models/FileCapabilities.swift,
+				WorkSpace/Models/FileConversion.swift,
+				WorkSpace/Models/FileDetector.swift,
 				WorkSpace/Models/FileDiff.swift,
+				WorkSpace/Models/FileNode.swift,
+				WorkSpace/Models/FileType.swift,
+				"WorkSpace/Models/FileType+Extensions.swift",
 				WorkSpace/Models/FileVersion.swift,
 				WorkSpace/Models/LocalCommit.swift,
 				WorkSpace/Models/LocalFile.swift,
@@ -86,103 +73,146 @@
 				WorkSpace/Models/ProjectVersion.swift,
 				WorkSpace/Models/RemoteFileSnapshot.swift,
 				WorkSpace/Models/SyncStatus.swift,
+				WorkSpace/Service/FireStore/DefaultFirestoreBandStrategy.swift,
+				WorkSpace/Service/FireStore/DefaultFirestoreBranchStrategy.swift,
+				WorkSpace/Service/FireStore/DefaultFirestoreProjectStrategy.swift,
+				WorkSpace/Service/FireStore/DefaultFirestoreStorageStrategy.swift,
+				WorkSpace/Service/FireStore/DefaultFirestoreUserStrategy.swift,
+				WorkSpace/Service/FireStore/DefaultFirestoreVersionStrategy.swift,
+				WorkSpace/Service/FireStore/FirestoreManager.swift,
+				WorkSpace/Service/Services/BookmarkStrategy.swift,
+				WorkSpace/Service/Services/CommitApplicationStrategy.swift,
+				WorkSpace/Service/Services/CommitStorageStrategy.swift,
+				WorkSpace/Service/Services/DetailedWorkSpace/DiffEngineStrategy.swift,
+				WorkSpace/Service/Services/FilePickerService.swift,
+				WorkSpace/Service/Services/FileScannerStrategy.swift,
+				WorkSpace/Service/Services/FileUploadService.swift,
+				WorkSpace/Service/Services/FirestoreRemoteFetch.swift,
+				WorkSpace/Service/Services/LocalCommitStorageService.swift,
+				WorkSpace/Service/Services/LocalFileScanner.swift,
+				WorkSpace/Service/Services/PosterEncoderService.swift,
+				WorkSpace/Service/Services/ProjectCreationService.swift,
+				WorkSpace/Service/Services/ProjectNetworkService.swift,
+				WorkSpace/Service/Services/ProjectPersistenceService.swift,
+				WorkSpace/Service/Services/ProjectSyncService.swift,
+				WorkSpace/Service/Sync/SyncOrchestrator.swift,
+				WorkSpace/View/AddProject/NewProjectSheetView.swift,
+				WorkSpace/View/DetailedWorkSpace/AudioPlayerView.swift,
+				WorkSpace/View/DetailedWorkSpace/DiffChangeRow.swift,
+				WorkSpace/View/DetailedWorkSpace/DiffPreviewView.swift,
+				WorkSpace/View/DetailedWorkSpace/FileRowView.swift,
+				WorkSpace/View/DetailedWorkSpace/FileTreePlayerNodeView.swift,
+				WorkSpace/View/DetailedWorkSpace/FileTreeView.swift,
+				WorkSpace/View/DetailedWorkSpace/ProjectDetailView.swift,
+				WorkSpace/View/DetailedWorkSpace/VersionRowView.swift,
+				WorkSpace/View/MainScreen/EmptyStateView.swift,
+				WorkSpace/View/MainScreen/NewProjectCard.swift,
+				WorkSpace/View/MainScreen/ProjectCard.swift,
+				WorkSpace/View/MainScreen/WorkspaceView.swift,
+				WorkSpace/ViewModel/AddProject/NewProjectSheetViewModel.swift,
+				WorkSpace/ViewModel/DetailedWorkSpace/ProjectDetailViewModel.swift,
+				WorkSpace/ViewModel/MainScreen/ProjectCardViewModel.swift,
+				WorkSpace/ViewModel/MainScreen/WorkspaceViewModel.swift,
 			);
 			target = C574AD152F82308F00FBA2E7 /* StemHub(macOS) */;
 		};
-		C574AD782F8234D400FBA2E7 /* Exceptions for "StemHub" folder in "StemHub(macOS)" target */ = {
+		C5F3516F2F83FA2400BBD37F /* Exceptions for "StemHub(macOS)" folder in "StemHub(iOS)" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				Shared/LaunchScreen/Models/AlertItem.swift,
-				Shared/LaunchScreen/Models/Field.swift,
-				Shared/LaunchScreen/Models/LaunchRoute.swift,
-				Shared/LaunchScreen/Models/ResetPasswordError.swift,
-				Shared/LaunchScreen/Models/User.swift,
-				Shared/LaunchScreen/Service/Auth/GoogleAuthService.swift,
-				"Shared/LaunchScreen/Service/Strategies/Protocols /AuthStateStrategy.swift",
-				"Shared/LaunchScreen/Service/Strategies/Protocols /UserCreationStrategy.swift",
-				"Shared/LaunchScreen/Service/Strategies/Protocols /UserFetchStrategy.swift",
-				"Shared/LaunchScreen/Service/Strategies/Protocols /UserSaveStrategy.swift",
-				Shared/LaunchScreen/Service/Strategies/Strategies/DefaultAuthStateStrategy.swift,
-				Shared/LaunchScreen/Service/Strategies/Strategies/DefaultUserCreationStrategy.swift,
-				Shared/LaunchScreen/Service/Strategies/Strategies/FirestoreFetchStrategy.swift,
-				Shared/LaunchScreen/Service/Strategies/Strategies/FirestoreSaveStrategy.swift,
-				Shared/LaunchScreen/Service/Strategies/Strategies/UserAuthOrchestrator.swift,
-				Shared/LaunchScreen/ViewModel/AuthViewModel.swift,
-				Shared/LaunchScreen/ViewModel/SocialLoginViewModel.swift,
-				Shared/LaunchScreen/ViewModel/TermsAndPrivacyLabelViewModel.swift,
-				"Shared/LaunchScreen/Views/Launch /LaunchView.swift",
-				"Shared/LaunchScreen/Views/Launch /Login/LoginScreen.swift",
-				"Shared/LaunchScreen/Views/Launch /Login/ResetPasswrdScreen.swift",
-				"Shared/LaunchScreen/Views/Launch /SignUp/SignUpScreen.swift",
-				"Shared/LaunchScreen/Views/Launch /Welcome/SocialLoginSubView.swift",
-				"Shared/LaunchScreen/Views/Launch /Welcome/TermsAndPrivacyLabel.swift",
-				"Shared/LaunchScreen/Views/Launch /Welcome/WelcomeScreen.swift",
-				Shared/Resources/Assets.xcassets,
-				Shared/Resources/Constants/AppURLs.swift,
-				Shared/Resources/Constants/UserDefaultsManager.swift,
-				Shared/Resources/Extentions/AuthDataResult.swift,
-				Shared/Resources/Extentions/FileManager.swift,
-				Shared/Resources/Extentions/View_iOS.swift,
-				Shared/Resources/Extentions/View.swift,
-				"Shared/Resources/GoogleService-Info-macOS.plist",
-				Shared/Resources/Loading/LoadingOverlayModifier.swift,
-				Shared/Resources/Loading/LoadingView.swift,
-				Shared/Resources/Utils/Fonts.swift,
-				Shared/Resources/Views/GradientTextField.swift,
-				Shared/Resources/Views/KeyboardAdaptive.swift,
-				Shared/WorkSpaceScreen/MainScreen/Service/FirestoreManager.swift,
-				Shared/WorkSpaceScreen/MainScreen/Service/Protocols/CommitStorageStrategy.swift,
-				Shared/WorkSpaceScreen/MainScreen/Service/Protocols/DiffCalculationStrategy.swift,
-				Shared/WorkSpaceScreen/MainScreen/Service/Protocols/FileScanStrategy.swift,
-				Shared/WorkSpaceScreen/MainScreen/Service/Protocols/FileUploadStrategy.swift,
-				Shared/WorkSpaceScreen/MainScreen/Service/Protocols/RemoteFetchStrategy.swift,
-				Shared/WorkSpaceScreen/MainScreen/Service/Strategies/FirebaseStorageUpload.swift,
-				Shared/WorkSpaceScreen/MainScreen/Service/Strategies/FirestoreCommitStorage.swift,
-				Shared/WorkSpaceScreen/MainScreen/Service/Strategies/FirestoreRemoteFetch.swift,
-				Shared/WorkSpaceScreen/MainScreen/Service/Strategies/LocalFileScanner.swift,
-				Shared/WorkSpaceScreen/MainScreen/Service/Strategies/StandardDiffEngine.swift,
-				Shared/WorkSpaceScreen/MainScreen/Service/Sync/SyncOrchestrator.swift,
+				Entery/AppAssembler.swift,
+				Entery/EnteryViewMacOS.swift,
+				Entery/MainAppShellView.swift,
+				Entery/Modules/WorkspaceModule.swift,
+				Entery/StemHub_macOS_App.swift,
+				Resources/Extentions/View.swift,
+				"Resources/GoogleService-Info.plist",
+				"Resources/StemHub_macOS-Info.plist",
+				Settings/SettingsView.swift,
+				"WorkSpace/Models/ FileTreeNode.swift",
+				WorkSpace/Models/Band.swift,
+				WorkSpace/Models/Branch.swift,
+				WorkSpace/Models/Comment.swift,
+				WorkSpace/Models/Commit.swift,
+				WorkSpace/Models/CommitFileSnapshot.swift,
+				WorkSpace/Models/CommitStatus.swift,
+				WorkSpace/Models/DiffResult.swift,
+				WorkSpace/Models/FileBlob.swift,
+				WorkSpace/Models/FileCapabilities.swift,
+				WorkSpace/Models/FileConversion.swift,
+				WorkSpace/Models/FileDetector.swift,
+				WorkSpace/Models/FileDiff.swift,
+				WorkSpace/Models/FileNode.swift,
+				WorkSpace/Models/FileType.swift,
+				"WorkSpace/Models/FileType+Extensions.swift",
+				WorkSpace/Models/FileVersion.swift,
+				WorkSpace/Models/LocalCommit.swift,
+				WorkSpace/Models/LocalFile.swift,
+				WorkSpace/Models/LocalProjectState.swift,
+				WorkSpace/Models/MusicFile.swift,
+				WorkSpace/Models/PendingCommit.swift,
+				WorkSpace/Models/Project.swift,
+				WorkSpace/Models/ProjectDiff.swift,
+				WorkSpace/Models/ProjectError.swift,
+				WorkSpace/Models/ProjectVersion.swift,
+				WorkSpace/Models/RemoteFileSnapshot.swift,
+				WorkSpace/Models/SyncStatus.swift,
+				WorkSpace/Service/FireStore/FirestoreManager.swift,
+				WorkSpace/Service/Services/BookmarkStrategy.swift,
+				WorkSpace/Service/Services/CommitApplicationStrategy.swift,
+				WorkSpace/Service/Services/CommitStorageStrategy.swift,
+				WorkSpace/Service/Services/DetailedWorkSpace/DiffEngineStrategy.swift,
+				WorkSpace/Service/Services/FilePickerService.swift,
+				WorkSpace/Service/Services/FileScannerStrategy.swift,
+				WorkSpace/Service/Services/FileUploadService.swift,
+				WorkSpace/Service/Services/FirestoreRemoteFetch.swift,
+				WorkSpace/Service/Services/LocalCommitStorageService.swift,
+				WorkSpace/Service/Services/LocalFileScanner.swift,
+				WorkSpace/Service/Services/PosterEncoderService.swift,
+				WorkSpace/Service/Services/ProjectCreationService.swift,
+				WorkSpace/Service/Services/ProjectNetworkService.swift,
+				WorkSpace/Service/Services/ProjectPersistenceService.swift,
+				WorkSpace/Service/Services/ProjectSyncService.swift,
+				WorkSpace/Service/Sync/SyncOrchestrator.swift,
+				WorkSpace/View/AddProject/NewProjectSheetView.swift,
+				WorkSpace/View/DetailedWorkSpace/AudioPlayerView.swift,
+				WorkSpace/View/DetailedWorkSpace/DiffChangeRow.swift,
+				WorkSpace/View/DetailedWorkSpace/DiffPreviewView.swift,
+				WorkSpace/View/DetailedWorkSpace/FileRowView.swift,
+				WorkSpace/View/DetailedWorkSpace/FileTreePlayerNodeView.swift,
+				WorkSpace/View/DetailedWorkSpace/FileTreeView.swift,
+				WorkSpace/View/DetailedWorkSpace/ProjectDetailView.swift,
+				WorkSpace/View/DetailedWorkSpace/VersionRowView.swift,
+				WorkSpace/View/MainScreen/EmptyStateView.swift,
+				WorkSpace/View/MainScreen/NewProjectCard.swift,
+				WorkSpace/View/MainScreen/ProjectCard.swift,
+				WorkSpace/View/MainScreen/WorkspaceView.swift,
+				WorkSpace/ViewModel/AddProject/NewProjectSheetViewModel.swift,
+				WorkSpace/ViewModel/DetailedWorkSpace/ProjectDetailViewModel.swift,
+				WorkSpace/ViewModel/MainScreen/ProjectCardViewModel.swift,
+				WorkSpace/ViewModel/MainScreen/WorkspaceViewModel.swift,
 			);
-			target = C574AD152F82308F00FBA2E7 /* StemHub(macOS) */;
-		};
-		C5F3516F2F83FA2400BBD37F /* Exceptions for "StemHub(macOS)" folder in "StemHub" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				WorkSpace/DetailedWorkSpace/ViewModels/ProjectDetailViewModel.swift,
-				WorkSpace/MainScreen/ViewModels/ProjectCardViewModel.swift,
-				WorkSpace/MainScreen/ViewModels/Protocols/BookmarkStrategy.swift,
-				WorkSpace/MainScreen/ViewModels/Protocols/ProjectNetworkStrategy.swift,
-				WorkSpace/MainScreen/ViewModels/Protocols/ProjectPersistenceStrategy.swift,
-				WorkSpace/MainScreen/ViewModels/Protocols/ProjectSyncStrategy.swift,
-				WorkSpace/MainScreen/ViewModels/Strategies/ProjectNetworkService.swift,
-				WorkSpace/MainScreen/ViewModels/WorkspaceViewModel.swift,
-				WorkSpace/MainScreen/Views/EmptyStateView.swift,
-				WorkSpace/MainScreen/Views/NewProjectCard.swift,
-				WorkSpace/MainScreen/Views/ProjectCard.swift,
-				WorkSpace/MainScreen/Views/WorkspaceView.swift,
-			);
-			target = C574A87D2F81CF7F00FBA2E7 /* StemHub */;
+			target = C574A87D2F81CF7F00FBA2E7 /* StemHub(iOS) */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		C574A8802F81CF7F00FBA2E7 /* StemHub */ = {
+		C50FCE552F84BE9000A6C0A8 /* StemHub(Shared) */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-				C574AD782F8234D400FBA2E7 /* Exceptions for "StemHub" folder in "StemHub(macOS)" target */,
-			);
-			path = StemHub;
+			path = "StemHub(Shared)";
 			sourceTree = "<group>";
 		};
 		C574ACFF2F822FBB00FBA2E7 /* StemHub(iOS) */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				C50FCEC92F84D98B00A6C0A8 /* Exceptions for "StemHub(iOS)" folder in "StemHub(iOS)" target */,
+			);
 			path = "StemHub(iOS)";
 			sourceTree = "<group>";
 		};
 		C574AD792F82374000FBA2E7 /* StemHub(macOS) */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				C5F3516F2F83FA2400BBD37F /* Exceptions for "StemHub(macOS)" folder in "StemHub" target */,
+				C5F3516F2F83FA2400BBD37F /* Exceptions for "StemHub(macOS)" folder in "StemHub(iOS)" target */,
 				C51BD6FB2F8257AA00C7E108 /* Exceptions for "StemHub(macOS)" folder in "StemHub(macOS)" target */,
 			);
 			path = "StemHub(macOS)";
@@ -195,8 +225,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C51E9A602F84B99600B94561 /* FirebaseCore in Frameworks */,
 				C574AD072F822FD300FBA2E7 /* GoogleSignIn in Frameworks */,
-				C574AD112F82302800FBA2E7 /* FirebaseCore in Frameworks */,
 				C574AD0F2F82302100FBA2E7 /* FirebaseFirestore in Frameworks */,
 				C574AD0D2F82301B00FBA2E7 /* FirebaseAuth in Frameworks */,
 				C574AD092F822FD300FBA2E7 /* GoogleSignInSwift in Frameworks */,
@@ -223,16 +253,16 @@
 			isa = PBXGroup;
 			children = (
 				C574ACFF2F822FBB00FBA2E7 /* StemHub(iOS) */,
-				C574A8802F81CF7F00FBA2E7 /* StemHub */,
 				C574AD792F82374000FBA2E7 /* StemHub(macOS) */,
 				C574A87F2F81CF7F00FBA2E7 /* Products */,
+				C50FCE552F84BE9000A6C0A8 /* StemHub(Shared) */,
 			);
 			sourceTree = "<group>";
 		};
 		C574A87F2F81CF7F00FBA2E7 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				C574A87E2F81CF7F00FBA2E7 /* StemHub.app */,
+				C574A87E2F81CF7F00FBA2E7 /* StemHub(iOS).app */,
 				C574AD162F82308F00FBA2E7 /* StemHub(macOS).app */,
 			);
 			name = Products;
@@ -246,9 +276,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		C574A87D2F81CF7F00FBA2E7 /* StemHub */ = {
+		C574A87D2F81CF7F00FBA2E7 /* StemHub(iOS) */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = C574A8892F81CF8000FBA2E7 /* Build configuration list for PBXNativeTarget "StemHub" */;
+			buildConfigurationList = C574A8892F81CF8000FBA2E7 /* Build configuration list for PBXNativeTarget "StemHub(iOS)" */;
 			buildPhases = (
 				C574A87A2F81CF7F00FBA2E7 /* Sources */,
 				C574A87B2F81CF7F00FBA2E7 /* Frameworks */,
@@ -259,11 +289,11 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				C574A8802F81CF7F00FBA2E7 /* StemHub */,
+				C50FCE552F84BE9000A6C0A8 /* StemHub(Shared) */,
 				C574ACFF2F822FBB00FBA2E7 /* StemHub(iOS) */,
 				C574AD792F82374000FBA2E7 /* StemHub(macOS) */,
 			);
-			name = StemHub;
+			name = "StemHub(iOS)";
 			packageProductDependencies = (
 				C574AD062F822FD300FBA2E7 /* GoogleSignIn */,
 				C574AD082F822FD300FBA2E7 /* GoogleSignInSwift */,
@@ -273,7 +303,7 @@
 				C574AD742F8234B800FBA2E7 /* FirebaseStorage */,
 			);
 			productName = StemHub;
-			productReference = C574A87E2F81CF7F00FBA2E7 /* StemHub.app */;
+			productReference = C574A87E2F81CF7F00FBA2E7 /* StemHub(iOS).app */;
 			productType = "com.apple.product-type.application";
 		};
 		C574AD152F82308F00FBA2E7 /* StemHub(macOS) */ = {
@@ -287,6 +317,9 @@
 			buildRules = (
 			);
 			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				C50FCE552F84BE9000A6C0A8 /* StemHub(Shared) */,
 			);
 			name = "StemHub(macOS)";
 			packageProductDependencies = (
@@ -342,7 +375,7 @@
 			);
 			projectRoot = "";
 			targets = (
-				C574A87D2F81CF7F00FBA2E7 /* StemHub */,
+				C574A87D2F81CF7F00FBA2E7 /* StemHub(iOS) */,
 				C574AD152F82308F00FBA2E7 /* StemHub(macOS) */,
 			);
 		};
@@ -512,7 +545,7 @@
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = StemHub/Info.plist;
+				INFOPLIST_FILE = "StemHub(iOS)/Resources/StemHub_iOS-Info.plist";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -526,7 +559,6 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 26.4;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "comStemHub.StemHub-iOS";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -541,7 +573,6 @@
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 1;
-				XROS_DEPLOYMENT_TARGET = 26.4;
 			};
 			name = Debug;
 		};
@@ -558,7 +589,7 @@
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = StemHub/Info.plist;
+				INFOPLIST_FILE = "StemHub(iOS)/Resources/StemHub_iOS-Info.plist";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -572,7 +603,6 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 26.4;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "comStemHub.StemHub-iOS";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -587,7 +617,6 @@
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 1;
-				XROS_DEPLOYMENT_TARGET = 26.4;
 			};
 			name = Release;
 		};
@@ -697,7 +726,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		C574A8892F81CF8000FBA2E7 /* Build configuration list for PBXNativeTarget "StemHub" */ = {
+		C574A8892F81CF8000FBA2E7 /* Build configuration list for PBXNativeTarget "StemHub(iOS)" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				C574A88A2F81CF8000FBA2E7 /* Debug */,

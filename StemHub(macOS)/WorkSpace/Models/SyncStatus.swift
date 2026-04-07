@@ -7,10 +7,6 @@
 
 import Foundation
 
-
 enum SyncStatus: String, Codable {
-    case uploading
-    case synced
-    case pending
-    case conflict
+    case uploading, synced,  pending, conflict
 }
