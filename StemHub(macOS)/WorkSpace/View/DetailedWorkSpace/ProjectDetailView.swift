@@ -7,7 +7,6 @@
 
 import SwiftUI
 import UniformTypeIdentifiers
-import Combine
 
 struct ProjectDetailView: View {
     @StateObject var viewModel: ProjectDetailViewModel
@@ -16,24 +15,10 @@ struct ProjectDetailView: View {
     @State private var showingCommitSheet = false
     @State private var commitMessage = ""
     @State private var selectedFileURL: URL?
-    @State private var selectedAudioURL: URL?
     
-    init(project: Project,
-         localState: LocalProjectState,
-         authService: AuthServiceProtocol,
-         syncService: ProjectSyncService,
-         versionService: ProjectVersionService,
-         commitStorage: LocalCommitService,
-         fileService: ProjectFileService) {
-        _viewModel = StateObject(wrappedValue: ProjectDetailViewModel(
-            project: project,
-            localState: localState,
-            authService: authService,
-            syncService: syncService,
-            versionService: versionService,
-            commitStorage: commitStorage,
-            fileService: fileService
-        ))
+    // Accept the ViewModel directly (created by AppAssembler)
+    init(viewModel: ProjectDetailViewModel) {
+        _viewModel = StateObject(wrappedValue: viewModel)
     }
     
     var body: some View {
@@ -240,7 +225,8 @@ struct ProjectDetailView: View {
                 }
                 Button("Commit") {
                     Task {
-                        await viewModel.commitChanges(message: commitMessage)
+                        // Pass nil to auto‑detect all local changes
+                        await viewModel.commitChanges(message: commitMessage, stagedFiles: [])
                         showingCommitSheet = false
                         commitMessage = ""
                     }
@@ -262,7 +248,3 @@ struct ProjectDetailView: View {
         await viewModel.updatePoster(image)
     }
 }
-
-
-
-

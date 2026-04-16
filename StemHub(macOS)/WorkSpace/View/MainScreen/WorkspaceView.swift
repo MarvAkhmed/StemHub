@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct WorkspaceView: View {
-    @ObservedObject var viewModel: WorkspaceViewModel 
+    @StateObject var viewModel: WorkspaceViewModel
     let module: WorkspaceModule
     @State private var showNewProjectSheet = false
     
@@ -27,26 +27,21 @@ struct WorkspaceView: View {
             }
             .background(Color(NSColor.windowBackgroundColor))
             .sheet(isPresented: $showNewProjectSheet) {
+                // Use module to create NewProjectSheetViewModel if needed,
+                // but for simplicity we keep existing initializer.
                 NewProjectSheetView(viewModel: NewProjectSheetViewModel(workspaceViewModel: viewModel))
             }
             .navigationDestination(for: Project.self) { project in
-                let state = viewModel.getLocalState(for: project)
-                ProjectDetailView(
-                    project: project,
-                    localState: state,
-                    authService: module.getAuthService(),
-                    syncService: module.getSyncService(),
-                    versionService: module.getVersionService(),
-                    commitStorage: module.getCommitStorage(),
-                    fileService: module.getFileService()
-                )
+                // Create ProjectDetailViewModel using the module, then pass it to ProjectDetailView
+                let detailViewModel = module.makeProjectDetailViewModel(project: project)
+                ProjectDetailView(viewModel: detailViewModel)
             }
             .task {
-                await viewModel.loadProjects()
+                await viewModel.loadWorkspace()
             }
             .alert("Error", isPresented: Binding(
                 get: { viewModel.errorMessage != nil },
-                set: { _, _ in }  // Fixed: can't assign to get-only property
+                set: { _ in }  // No action needed on set
             )) {
                 Button("OK") { }
             } message: {

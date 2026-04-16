@@ -1,0 +1,13 @@
+//
+//  BlobRepository.swift
+//  StemHub(macOS)
+//
+//  Created by Marwa Awad on 16.04.2026.
+//
+
+import Foundation
+import FirebaseFirestore
+
+protocol BlobRepository {
+    func fetchBlob(blobID: String) async throws -> FileBlob?
+}

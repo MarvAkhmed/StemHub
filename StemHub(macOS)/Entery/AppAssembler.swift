@@ -51,9 +51,9 @@ struct AppAssembler {
         workspaceModule.makeWorkspaceViewModel()
     }
     
-    func makeProjectDetailViewModel(project: Project,
-                                    localState: LocalProjectState) -> ProjectDetailViewModel {
-        workspaceModule.makeProjectDetailViewModel(project: project, localState: localState)
+    // Updated: now takes only the project; localState is removed
+    func makeProjectDetailViewModel(project: Project) -> ProjectDetailViewModel {
+        workspaceModule.makeProjectDetailViewModel(project: project)
     }
     
     func getWorkspaceModule() -> WorkspaceModule {

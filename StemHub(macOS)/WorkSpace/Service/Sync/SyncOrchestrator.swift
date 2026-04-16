@@ -6,56 +6,48 @@
 //
 
 import Foundation
-import FirebaseFirestore
 
-enum SyncError: Error {
-    case branchNotFound, projectNotFound, outdatedCommit
-}
 
 final class SyncOrchestrator {
-    private let scanStrategy: FileScanStrategy
+    private let scanStrategy: FileScanner
     private let diffStrategy: DiffEngineStrategy
-    private let commitStorage: CommitStorageStrategy
-    private let remoteFetch: RemoteFetchStrategy
+    private let commitRepository: CommitRepository
     private let fileUploadStrategy: FileUploadStrategy
-    private let branchStrategy: FirestoreBranchStrategy
-    private let versionStrategy: FirestoreVersionStrategy
-    private let blobStrategy: FirestoreBlobStrategy
+    private let branchRepository: BranchRepository
+    private let versionRepository: VersionRepository
+    private let blobRepository: BlobRepository
 
     init(
-        scanStrategy: FileScanStrategy = LocalFileScanner(),
+        scanStrategy: FileScanner = LocalFileScanner(),
         diffStrategy: DiffEngineStrategy = DefaultDiffEngineStrategy(),
-        commitStorage: CommitStorageStrategy = DefaultCommitStorageStrategy(),
-        remoteFetch: RemoteFetchStrategy = FirestoreRemoteFetch(),
+        commitRepository: CommitRepository = DefaultCommitRepository(),
         fileUploadStrategy: FileUploadStrategy = FileUploadService(),
-        branchStrategy: FirestoreBranchStrategy = DefaultFirestoreBranchStrategy(),
-        versionStrategy: FirestoreVersionStrategy = DefaultFirestoreVersionStrategy(),
-        blobStrategy: FirestoreBlobStrategy = DefaultFirestoreBlobStrategy()
+        branchRepository: BranchRepository = DefaultBranchRepository(),
+        versionRepository: VersionRepository = DefaultVersionRepository(),
+        blobRepository: BlobRepository = DefaultBlobRepository()
     ) {
         self.scanStrategy = scanStrategy
         self.diffStrategy = diffStrategy
-        self.commitStorage = commitStorage
-        self.remoteFetch = remoteFetch
+        self.commitRepository = commitRepository
         self.fileUploadStrategy = fileUploadStrategy
-        self.branchStrategy = branchStrategy
-        self.versionStrategy = versionStrategy
-        self.blobStrategy = blobStrategy
+        self.branchRepository = branchRepository
+        self.versionRepository = versionRepository
+        self.blobRepository = blobRepository
     }
 
-    func commit(localPath: URL,
-                localState: LocalProjectState,
-                remoteSnapshot: [RemoteFileSnapshot],
-                userID: String,
-                message: String?,
-                stagedFiles: [LocalFile]? = nil) async throws -> Commit {
-        
-        let localFiles =  try scanStrategy.scan(folderURL: localPath)
-        let stagedFiles = stagedFiles ?? localFiles
-        
-        let diffResult = diffStrategy.computeDiff(local: stagedFiles, remote: remoteSnapshot)
+    func commit(
+        localPath: URL,
+        localState: ProjectSyncState,
+        remoteSnapshot: [RemoteFileSnapshot],
+        userID: String,
+        message: String?,
+        stagedFiles: [LocalFile]? = nil
+    ) async throws -> Commit {
+        let files = try stagedFiles ?? scanStrategy.scan(folderURL: localPath)
+        let diffResult = diffStrategy.computeDiff(local: files, remote: remoteSnapshot)
         let projectDiff = diffStrategy.mapToProjectDiff(diffResult)
 
-        let snapshot: [CommitFileSnapshot] = stagedFiles
+        let snapshot = files
             .filter { !$0.isDirectory }
             .map {
                 CommitFileSnapshot(
@@ -67,7 +59,7 @@ final class SyncOrchestrator {
                 )
             }
 
-        let commit = Commit(
+        return Commit(
             id: UUID().uuidString,
             projectID: localState.projectID,
             parentCommitID: localState.lastCommittedID,
@@ -79,24 +71,21 @@ final class SyncOrchestrator {
             message: message ?? "Auto commit",
             status: .local
         )
-
-        return commit
     }
 
     func pushCommit(_ commit: Commit, localRootURL: URL, branchID: String) async throws -> ProjectVersion {
-        return try await commitStorage.saveCommit(commit, localRootURL: localRootURL, branchID: branchID)
+        try await commitRepository.pushCommit(commit, localRootURL: localRootURL, branchID: branchID)
     }
 
     func pullProject(
         projectID: String,
         branchID: String,
         localRootURL: URL,
-        state: LocalProjectState
-    ) async throws -> LocalProjectState {
+        state: ProjectSyncState
+    ) async throws -> ProjectSyncState {
         var updatedState = state
 
-        // 1. Fetch branch using injected strategy
-        guard let branch = try await branchStrategy.fetchBranch(branchID: branchID) else {
+        guard let branch = try await branchRepository.fetchBranch(branchID: branchID) else {
             throw SyncError.branchNotFound
         }
 
@@ -108,46 +97,40 @@ final class SyncOrchestrator {
             return updatedState
         }
 
-        // 2. Fetch project version
-        guard let projectVersion = try await versionStrategy.fetchVersion(versionID: latestVersionID) else {
+        guard let projectVersion = try await versionRepository.fetchVersion(versionID: latestVersionID) else {
             throw SyncError.projectNotFound
         }
 
-        // 3. Fetch all file versions for this project version
-        let fileVersions = try await versionStrategy.fetchFileVersions(fileVersionIDs: projectVersion.fileVersionIDs)
+        let fileVersions = try await versionRepository.fetchFileVersions(fileVersionIDs: projectVersion.fileVersionIDs)
 
-        // 4. Fetch blobs for each file version
         var blobs: [String: FileBlob] = [:]
         for fileVersion in fileVersions {
-            if let blob = try await blobStrategy.fetchBlob(blobID: fileVersion.blobID) {
+            if let blob = try await blobRepository.fetchBlob(blobID: fileVersion.blobID) {
                 blobs[fileVersion.blobID] = blob
             }
         }
 
-        // 5. Apply diffs to local folder
         for diff in projectVersion.diff.files {
-            let filePath = localRootURL.appendingPathComponent(diff.path)
+            let targetURL = localRootURL.appendingPathComponent(diff.path)
 
             switch diff.changeType {
             case .added, .modified:
                 guard let newHash = diff.newHash, let blob = blobs[newHash] else { continue }
-                let dir = filePath.deletingLastPathComponent()
-                try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
-                try? FileManager.default.removeItem(at: filePath)
-                try await fileUploadStrategy.downloadFile(storagePath: blob.storagePath, to: filePath)
+                try FileManager.default.createDirectory(at: targetURL.deletingLastPathComponent(), withIntermediateDirectories: true)
+                try? FileManager.default.removeItem(at: targetURL)
+                try await fileUploadStrategy.downloadFile(storagePath: blob.storagePath, to: targetURL)
 
             case .removed:
-                if FileManager.default.fileExists(atPath: filePath.path) {
-                    try FileManager.default.removeItem(at: filePath)
+                if FileManager.default.fileExists(atPath: targetURL.path) {
+                    try FileManager.default.removeItem(at: targetURL)
                 }
 
             case .renamed:
                 guard let oldPath = diff.oldPath else { continue }
-                let oldURL = localRootURL.appendingPathComponent(oldPath)
-                if FileManager.default.fileExists(atPath: oldURL.path) {
-                    let dir = filePath.deletingLastPathComponent()
-                    try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
-                    try FileManager.default.moveItem(at: oldURL, to: filePath)
+                let sourceURL = localRootURL.appendingPathComponent(oldPath)
+                if FileManager.default.fileExists(atPath: sourceURL.path) {
+                    try FileManager.default.createDirectory(at: targetURL.deletingLastPathComponent(), withIntermediateDirectories: true)
+                    try FileManager.default.moveItem(at: sourceURL, to: targetURL)
                 }
             }
         }
@@ -156,3 +139,4 @@ final class SyncOrchestrator {
         return updatedState
     }
 }
+

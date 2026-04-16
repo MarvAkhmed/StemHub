@@ -9,117 +9,151 @@ import Foundation
 
 @MainActor
 final class WorkspaceModule {
-    // MARK: - Dependencies
-    private let persistence: ProjectPersistenceStrategy
-    private let bookmark: BookmarkStrategy
-    private let fileScanner: FileScannerStrategy
+
+    // MARK: - Repositories (Firestore implementations)
+    private let bandRepository: BandRepository
+    private let projectRepository: ProjectRepository
+    private let versionRepository: VersionRepository
+    private let branchRepository: BranchRepository
+    private let remoteSnapshotRepository: RemoteSnapshotRepository
+    private let blobRepository: BlobRepository
+    private let commitRepository: CommitRepository
+
+    // MARK: - Strategies & Stores
+    private let stateStore: ProjectStateStore
+    private let bookmarkStrategy: BookmarkStrategy
+    private let fileScanner: FileScanner
     private let diffEngine: DiffEngineStrategy
-    private let posterEncoder: PosterEncoderStrategy
-    private let network: ProjectNetworkStrategy
-    private let authService: AuthServiceProtocol
-    
+    private let posterEncoder: PosterEncoding
+
     // MARK: - Services
+    private let workspaceLoader: WorkspaceLoaderServiceProtocol
+    private let projectCreation: ProjectCreationServiceProtocol
+    private let syncOrchestrator: SyncOrchestrator
     private let syncService: ProjectSyncService
     private let versionService: ProjectVersionService
-    private let commitStorage: LocalCommitService
-    private let fileService: ProjectFileService
-    
+    private let localCommitStore: LocalCommitStore
+    private let folderService: ProjectFolderService
+
+    // MARK: - Auth
+    private let authService: AuthServiceProtocol
+
     // MARK: - Init
     init(authService: AuthServiceProtocol? = nil) {
-        // Initialize strategies
-        self.persistence = DefaultProjectPersistenceStrategy()
-        self.bookmark = DefaultBookmarkStrategy()
-        self.fileScanner = DefaultFileScannerStrategy()
+        // Repositories
+        self.bandRepository = FirestoreBandRepository()
+        self.projectRepository = FirestoreProjectRepository()
+        self.versionRepository = DefaultVersionRepository()
+        self.branchRepository = DefaultBranchRepository()
+        self.remoteSnapshotRepository = DefaultRemoteSnapshotRepository()
+        self.blobRepository = DefaultBlobRepository()
+        self.commitRepository = DefaultCommitRepository()
+
+        // Strategies & Stores
+        self.stateStore = UserDefaultsProjectStateStore()
+        self.bookmarkStrategy = DefaultBookmarkStrategy()
+        self.fileScanner = LocalFileScanner()
         self.diffEngine = DefaultDiffEngineStrategy()
         self.posterEncoder = PosterEncoderService()
-        self.network = DefaultProjectNetworkStrategy()
-        
-        // Initialize auth service - if not provided, create a new instance
-        // AuthService.init is @MainActor, so we need to use a nonisolated approach
-        // Since we're already on MainActor due to @MainActor on the class, this is fine
+
+        // Auth
         self.authService = authService ?? AuthService()
-        
-        // Initialize services
-        self.syncService = DefaultProjectSyncService(
-            syncOrchestrator: SyncOrchestrator(),
-            network: self.network,
-            persistence: self.persistence
+
+        // Services
+        self.workspaceLoader = WorkspaceLoaderService(
+            bandRepository: bandRepository,
+            projectRepository: projectRepository
         )
-        self.versionService = DefaultProjectVersionService(
-            network: self.network,
-            firestoreVersionStrategy: DefaultFirestoreVersionStrategy()
-        )
-        self.commitStorage = DefaultLocalCommitService()
-        self.fileService = DefaultProjectFileService(persistence: self.persistence)
-    }
-    
-    // MARK: - Factory Methods
-    
-    func makeProjectCreationService() -> ProjectCreationServiceProtocol {
-        ProjectCreationService(
-            network: network,
-            persistence: persistence,
-            bookmark: bookmark,
+
+        self.projectCreation = ProjectCreationService(
+            bandRepository: bandRepository,
+            projectRepository: projectRepository,
+            stateStore: stateStore,
+            bookmarkStrategy: bookmarkStrategy,
             posterEncoder: posterEncoder
         )
-    }
-    
-    func makeCommitStorage() -> LocalCommitService {
-        commitStorage
-    }
-    
-    func makeCommitApplier(commitStorage: LocalCommitService) -> CommitApplicationStrategy {
-        DefaultCommitApplicationStrategy(
-            network: network,
-            commitStorage: commitStorage,
+
+        self.syncOrchestrator = SyncOrchestrator(
+            scanStrategy: fileScanner,
+            diffStrategy: diffEngine,
+            commitRepository: commitRepository,
+            fileUploadStrategy: FileUploadService(),
+            branchRepository: branchRepository,
+            versionRepository: versionRepository,
+            blobRepository: blobRepository
+        )
+
+        self.syncService = DefaultProjectSyncService(
+            syncOrchestrator: syncOrchestrator,
+            branchRepository: branchRepository,
+            remoteSnapshotRepository: remoteSnapshotRepository,
+            stateStore: stateStore,
             diffEngine: diffEngine
         )
+
+        self.versionService = DefaultProjectVersionService(
+            versionRepository: versionRepository
+        )
+
+        self.localCommitStore = DefaultLocalCommitStore()
+
+        self.folderService = DefaultProjectFolderService(
+            stateStore: stateStore,
+            bookmarkStrategy: bookmarkStrategy,
+            scanner: fileScanner
+        )
     }
-    
+
+    // MARK: - Factory Methods
+
     func makeWorkspaceViewModel() -> WorkspaceViewModel {
         WorkspaceViewModel(
             authService: authService,
-            persistenceStrategy: persistence,
-            networkStrategy: network,
-            syncStrategy: syncService,
-            bookmarkStrategy: bookmark
+            workspaceLoader: workspaceLoader,
+            projectCreation: projectCreation,
+            syncService: syncService,
+            stateStore: stateStore,
+            bookmarkStrategy: bookmarkStrategy
         )
     }
-    
-    func makeProjectDetailViewModel(project: Project, localState: LocalProjectState) -> ProjectDetailViewModel {
-        ProjectDetailViewModel(
+
+    func makeProjectDetailViewModel(project: Project) -> ProjectDetailViewModel {
+        // Load current sync state for the project
+//        let syncState = stateStore.syncState(for: project.id)
+
+        return ProjectDetailViewModel(
             project: project,
-            localState: localState,
             authService: authService,
             syncService: syncService,
             versionService: versionService,
-            commitStorage: commitStorage,
-            fileService: fileService,
-            persistence: persistence,
-            network: network,
-            bookmark: bookmark,
+            localCommitStore: localCommitStore,
+            folderService: folderService,
+            stateStore: stateStore,
+            branchRepository: branchRepository,
+            projectRepository: projectRepository,
+            bookmarkStrategy: bookmarkStrategy,
             fileScanner: fileScanner
         )
     }
-    
-    // MARK: - Service Getters
-    
+
+    // MARK: - Service Getters (for convenience / testing)
+
     func getSyncService() -> ProjectSyncService {
         syncService
     }
-    
+
     func getVersionService() -> ProjectVersionService {
         versionService
     }
-    
-    func getCommitStorage() -> LocalCommitService {
-        commitStorage
+
+    func getLocalCommitStore() -> LocalCommitStore {
+        localCommitStore
     }
-    
-    func getFileService() -> ProjectFileService {
-        fileService
+
+    func getFolderService() -> ProjectFolderService {
+        folderService
     }
-    
+
     func getAuthService() -> AuthServiceProtocol {
         authService
     }
