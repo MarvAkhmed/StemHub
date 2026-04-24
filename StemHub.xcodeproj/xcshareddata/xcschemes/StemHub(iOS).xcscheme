@@ -16,7 +16,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "C574A87D2F81CF7F00FBA2E7"
-               BuildableName = "StemHub(iOS).app"
+               BuildableName = "StemHub_iOS.app"
                BlueprintName = "StemHub(iOS)"
                ReferencedContainer = "container:StemHub.xcodeproj">
             </BuildableReference>
@@ -46,7 +46,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "C574A87D2F81CF7F00FBA2E7"
-            BuildableName = "StemHub(iOS).app"
+            BuildableName = "StemHub_iOS.app"
             BlueprintName = "StemHub(iOS)"
             ReferencedContainer = "container:StemHub.xcodeproj">
          </BuildableReference>
@@ -63,7 +63,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "C574A87D2F81CF7F00FBA2E7"
-            BuildableName = "StemHub(iOS).app"
+            BuildableName = "StemHub_iOS.app"
             BlueprintName = "StemHub(iOS)"
             ReferencedContainer = "container:StemHub.xcodeproj">
          </BuildableReference>

@@ -19,7 +19,7 @@ struct AuthModule {
         AuthViewModel(authService: authService)
     }
     
-    func makeSocialLoginViewModel(authViewModel: AuthViewModel) -> SocialLoginViewModel {
+    func makeSocialLoginViewModel(authViewModel: any AuthViewModelProtocol) -> SocialLoginViewModel {
         SocialLoginViewModel(authViewModel: authViewModel)
     }
     
