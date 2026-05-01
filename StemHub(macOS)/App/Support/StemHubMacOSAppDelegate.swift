@@ -8,6 +8,7 @@
 import AppKit
 
 final class StemHubMacOSAppDelegate: NSObject, NSApplicationDelegate {
+    
     func applicationDidFinishLaunching(_ notification: Notification) {
         FirebaseRuntimeBootstrap.ensureConfigured()
     }

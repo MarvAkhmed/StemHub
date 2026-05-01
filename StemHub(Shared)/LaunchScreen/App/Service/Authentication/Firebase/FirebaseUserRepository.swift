@@ -10,8 +10,12 @@ import FirebaseFirestore
 
 final class FirebaseUserRepository: AuthUserRepository {
     
-    private let db = Firestore.firestore()
-    private let collectionName = "users"
+    private let db: Firestore
+    private let collectionName = FirestoreCollections.users.path
+    
+    init(db: Firestore = Firestore.firestore()) {
+        self.db = db
+    }
     
     func fetchUser(userId: String) async throws -> User? {
         let doc = try await db.collection(collectionName).document(userId).getDocument()

@@ -17,7 +17,7 @@ struct AppAssembler {
         self.dependencies = dependencies
         self.workspaceModule = WorkspaceModule(authService: dependencies.authService)
     }
-    
+
     func makeLaunchViewModels() -> LaunchViewModels {
         dependencies.makeLaunchViewModels()
     }

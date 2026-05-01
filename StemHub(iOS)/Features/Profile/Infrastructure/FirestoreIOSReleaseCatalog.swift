@@ -18,7 +18,7 @@ final class FirestoreIOSReleaseCatalog: IOSReleaseCatalogProviding {
 
     init(
         workspaceRepository: any IOSWorkspaceLoading,
-        db: Firestore = Firestore.firestore()
+        db: Firestore
     ) {
         self.workspaceRepository = workspaceRepository
         self.db = db

@@ -26,8 +26,8 @@ final class AuthService: AuthServiceProtocol {
     // MARK: - Single source of truth
     var currentUser: User? { sessionManager.currentUser }
     var isSignedIn: Bool { sessionManager.isSignedIn }
-    var currentUserPublisher: AnyPublisher<User?, Never> { sessionManager.currentUserPublisher }
-    var isSignedInPublisher: AnyPublisher<Bool, Never> { sessionManager.isSignedInPublisher }
+    var currentUserPublisher: AnyPublisher<User?, AuthError> { sessionManager.currentUserPublisher }
+    var isSignedInPublisher: AnyPublisher<Bool, AuthError> { sessionManager.isSignedInPublisher }
 
     // MARK: - Dependencies
     private let emailProvider: EmailAuthenticating

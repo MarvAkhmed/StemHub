@@ -12,13 +12,31 @@ struct WorkspaceServiceContainer {
     let workspaceCatalogService: WorkspaceProjectCatalogProviding
     let projectCreation: ProjectCreationServiceProtocol
     let projectDeletionService: ProjectDeletionServiceProtocol
+    let workspaceSectionFilter: WorkspaceSectionFiltering
+    let projectRemoteBlobCleaner: ProjectRemoteBlobCleaning
+    let pushCommitService: CommitPushing
     let syncOrchestrator: SyncOrchestrator
     let syncService: ProjectSyncService
     let versionService: ProjectVersionService
     let folderService: any ProjectFolderService
+    let localWorkspaceService: ProjectLocalWorkspaceService
+    let workspaceStateService: ProjectWorkspaceStateManaging
+    let projectPosterService: ProjectPosterManaging
+    let projectRemoteStateService: ProjectRemoteWorkspaceStateManaging
+    let projectDetailWorkspaceService: ProjectDetailWorkspaceLoading
+    let projectCommitWorkflowService: ProjectCommitWorkflowing
+    let projectBranchWorkflowService: ProjectDetailBranchWorkflowing
+    let projectFileWorkflowService: ProjectFileWorkflowing
+    let projectCommentWorkflowService: ProjectCommentWorkflowing
+    let timestampedCommentService: TimestampedCommentServing
+    let projectVersionWorkflowService: ProjectVersionWorkflowing
+    let fileTypeProvider: ProjectFileTypeProviding
+    let audioIdentityAnalysisService: AudioIdentityAnalysisService<CachedAudioFingerprinter<BasicAudioFingerprinter>>
+    let audioComparisonService: AudioComparisonService<BasicAudioSimilarityComparer>
     let branchService: ProjectBranchServiceProtocol
     let collaborationService: ProjectCollaborationServiceProtocol
     let commentService: ProjectCommentServiceProtocol
+    let projectCommentFilter: ProjectCommentFiltering
     let invitationService: BandInvitationServiceProtocol
     let releaseCatalogService: ReleaseCatalogProviding
     let versionApprovalService: ProjectVersionApprovalServiceProtocol
@@ -49,28 +67,40 @@ struct WorkspaceServiceContainer {
             posterEncoder: dependencies.posterEncoder
         )
 
+        projectRemoteBlobCleaner = ProjectRemoteBlobCleanupService(
+            blobStoragePathListing: dependencies.projectRepository,
+            blobByteCleaner: dependencies.fileTransferStrategy
+        )
+
         projectDeletionService = ProjectDeletionService(
             projectRepository: dependencies.projectRepository,
+            remoteBlobCleaner: projectRemoteBlobCleaner,
             stateStore: dependencies.stateStore,
             localCommitStore: dependencies.localCommitStore
         )
 
-        syncOrchestrator = SyncOrchestrator(
-            scanStrategy: dependencies.fileScanner,
-            diffStrategy: dependencies.diffEngine,
+        workspaceSectionFilter = DefaultWorkspaceSectionFilter()
+
+        pushCommitService = PushCommitService(
+            versionRepository: dependencies.versionRepository,
             commitRepository: dependencies.commitRepository,
-            fileUploadStrategy: FileUploadService(),
+            fileTransferStrategy: dependencies.fileTransferStrategy
+        )
+
+        syncOrchestrator = SyncOrchestrator(
+            localCommitSnapshotPreparer: dependencies.localCommitSnapshotPreparer,
+            commitPusher: pushCommitService,
             branchRepository: dependencies.branchRepository,
             versionRepository: dependencies.versionRepository,
-            blobRepository: dependencies.blobRepository
+            blobRepository: dependencies.blobRepository,
+            workingTree: dependencies.workingTreeCheckout
         )
 
         syncService = DefaultProjectSyncService(
             syncOrchestrator: syncOrchestrator,
             branchRepository: dependencies.branchRepository,
             remoteSnapshotRepository: dependencies.remoteSnapshotRepository,
-            stateStore: dependencies.stateStore,
-            diffEngine: dependencies.diffEngine
+            stateStore: dependencies.stateStore
         )
 
         folderService = DefaultProjectFolderService(
@@ -79,9 +109,59 @@ struct WorkspaceServiceContainer {
             scanner: dependencies.fileScanner
         )
 
+        localWorkspaceService = ProjectLocalWorkspaceService(
+            folderService: folderService,
+            localCommitStore: dependencies.localCommitStore
+        )
+
+        projectFileWorkflowService = ProjectFileWorkflowService(
+            localWorkspace: localWorkspaceService
+        )
+
+        workspaceStateService = ProjectWorkspaceStateService(
+            stateStore: dependencies.stateStore
+        )
+
+        fileTypeProvider = DefaultProjectFileTypeProvider(
+            mediaFileDetector: dependencies.mediaFileDetector
+        )
+
+        audioIdentityAnalysisService = AudioIdentityAnalysisService(
+            fileHasher: dependencies.fileHasher,
+            pcmHasher: dependencies.pcmHasher,
+            fingerprinter: dependencies.audioFingerprinter
+        )
+
+        audioComparisonService = AudioComparisonService(
+            comparer: dependencies.audioSimilarityComparer
+        )
+
+        projectPosterService = ProjectPosterService(
+            posterEncoder: dependencies.posterEncoder,
+            projectRepository: dependencies.projectRepository
+        )
+
+        projectRemoteStateService = ProjectRemoteWorkspaceStateService(
+            projectRepository: dependencies.projectRepository
+        )
+
         branchService = ProjectBranchService(
             branchRepository: dependencies.branchRepository,
             versionRepository: dependencies.versionRepository
+        )
+
+        projectCommitWorkflowService = ProjectCommitWorkflowService(
+            syncService: syncService,
+            localWorkspace: localWorkspaceService,
+            workspaceStateService: workspaceStateService
+        )
+
+        projectBranchWorkflowService = ProjectDetailBranchWorkflowService(
+            branchService: branchService,
+            localWorkspace: localWorkspaceService,
+            syncService: syncService,
+            workspaceStateService: workspaceStateService,
+            remoteStateService: projectRemoteStateService
         )
 
         invitationService = BandInvitationService(
@@ -96,8 +176,26 @@ struct WorkspaceServiceContainer {
             invitationService: invitationService
         )
 
+        projectDetailWorkspaceService = ProjectDetailWorkspaceService(
+            branchService: branchService,
+            localWorkspace: localWorkspaceService,
+            workspaceStateService: workspaceStateService,
+            collaborationService: collaborationService
+        )
+
         commentService = ProjectCommentService(
             commentRepository: dependencies.commentRepository
+        )
+
+        projectCommentFilter = DefaultProjectCommentFilter()
+
+        projectCommentWorkflowService = ProjectCommentWorkflowService(
+            commentService: commentService,
+            commentFilter: projectCommentFilter
+        )
+
+        timestampedCommentService = TimestampedCommentService(
+            repository: dependencies.commentRepository
         )
 
         releaseCatalogService = ReleaseCatalogService(
@@ -109,9 +207,15 @@ struct WorkspaceServiceContainer {
             versionRepository: dependencies.versionRepository
         )
 
+        projectVersionWorkflowService = ProjectVersionWorkflowService(
+            versionService: versionService,
+            versionApprovalService: versionApprovalService
+        )
+
         midiDocumentService = CoreAudioMIDIDocumentService()
         midiSessionResolver = DefaultProjectMIDISessionResolver(
-            folderService: folderService
+            folderService: folderService,
+            fileTypeProvider: fileTypeProvider
         )
         midiControllerMonitor = CoreMIDIControllerMonitor()
     }

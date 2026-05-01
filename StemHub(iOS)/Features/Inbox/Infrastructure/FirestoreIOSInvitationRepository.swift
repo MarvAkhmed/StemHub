@@ -25,12 +25,12 @@ protocol IOSInvitationManaging {
 final class FirestoreIOSInvitationRepository: IOSInvitationManaging {
     private let db: Firestore
 
-    init(db: Firestore = Firestore.firestore()) {
+    init(db: Firestore) {
         self.db = db
     }
 
     func fetchIncomingInvitations(for userID: String) async throws -> [IOSBandInvitation] {
-        let snapshot = try await db.collection("bandInvitations")
+        let snapshot = try await db.collection(FirestoreCollections.bandInvitations.path)
             .whereField("inviteeUserID", isEqualTo: userID)
             .getDocuments()
 
@@ -51,9 +51,9 @@ final class FirestoreIOSInvitationRepository: IOSInvitationManaging {
         switch action {
         case .accept:
             let batch = db.batch()
-            let invitationReference = db.collection("bandInvitations").document(invitation.id)
-            let bandReference = db.collection("bands").document(invitation.bandID)
-            let userReference = db.collection("users").document(invitation.inviteeUserID)
+            let invitationReference = db.collection(FirestoreCollections.bandInvitations.path).document(invitation.id)
+            let bandReference = db.collection(FirestoreCollections.bands.path).document(invitation.bandID)
+            let userReference = db.collection(FirestoreCollections.users.path).document(invitation.inviteeUserID)
 
             batch.updateData([
                 "status": IOSBandInvitationStatus.accepted.rawValue,
@@ -69,7 +69,7 @@ final class FirestoreIOSInvitationRepository: IOSInvitationManaging {
             try await batch.commit()
 
         case .decline:
-            try await db.collection("bandInvitations")
+            try await db.collection(FirestoreCollections.bandInvitations.path)
                 .document(invitation.id)
                 .updateData([
                     "status": IOSBandInvitationStatus.declined.rawValue,

@@ -63,20 +63,18 @@ private extension SettingsView {
                 }
 
                 Slider(value: $viewModel.defaultPlaybackRate, in: 0.5...1.5, step: 0.05)
-                    .tint(Color(red: 0.80, green: 0.58, blue: 0.98))
+                    .tint(StudioPalette.tint)
 
                 Toggle("Show timestamp markers during review", isOn: $viewModel.highlightCommentMarkers)
-                    .toggleStyle(.switch)
                     .foregroundStyle(.white)
 
                 Toggle("Keep inline stem players prepared", isOn: $viewModel.keepInlinePlayersArmed)
-                    .toggleStyle(.switch)
                     .foregroundStyle(.white)
 
                 Toggle("Use compact review sidebar", isOn: $viewModel.compactReviewSidebar)
-                    .toggleStyle(.switch)
                     .foregroundStyle(.white)
             }
+            .studioToggleSwitch()
         }
     }
 
@@ -84,13 +82,12 @@ private extension SettingsView {
         settingsCard(title: "Collaboration", symbol: "person.3.fill") {
             VStack(alignment: .leading, spacing: 14) {
                 Toggle("Refresh invitation inbox when the shell opens", isOn: $viewModel.autoRefreshInbox)
-                    .toggleStyle(.switch)
                     .foregroundStyle(.white)
 
                 Toggle("Allow collaboration alerts", isOn: $viewModel.notificationAlertsEnabled)
-                    .toggleStyle(.switch)
                     .foregroundStyle(.white)
             }
+            .studioToggleSwitch()
         }
     }
 

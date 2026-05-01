@@ -23,11 +23,9 @@ struct FirebaseBootstrapper: FirebaseBootstrapping {
     func configureIfNeeded(in bundle: Bundle) throws {
         let options = try configurationLoader.firebaseOptions(in: bundle)
 
-        if FirebaseApp.app() == nil {
-            FirebaseApp.configure(options: options)
-        }
+        FirebaseApp.configure(options: options)
 
-        guard let clientID = FirebaseApp.app()?.options.clientID ?? options.clientID,
+        guard let clientID = options.clientID,
               clientID.isEmpty == false else {
             throw AuthError.missingGoogleConfiguration
         }

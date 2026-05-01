@@ -9,6 +9,15 @@ import SwiftUI
 
 struct WorkspaceBandSectionView: View {
     let section: WorkspaceBandSection
+    let makeProjectCardViewModel: (WorkspaceProjectItem) -> ProjectCardViewModel
+    
+    init(section: WorkspaceBandSection, makeProjectCardViewModel: @escaping (WorkspaceProjectItem) -> ProjectCardViewModel, columns: [GridItem], onOpenProject: @escaping (Project) -> Void, onDeleteProject: @escaping (WorkspaceProjectItem) -> Void) {
+        self.section = section
+        self.makeProjectCardViewModel = makeProjectCardViewModel
+        self.columns = columns
+        self.onOpenProject = onOpenProject
+        self.onDeleteProject = onDeleteProject
+    }
     let columns: [GridItem]
     let onOpenProject: (Project) -> Void
     let onDeleteProject: (WorkspaceProjectItem) -> Void
@@ -20,7 +29,7 @@ struct WorkspaceBandSectionView: View {
             LazyVGrid(columns: columns, spacing: 20) {
                 ForEach(section.projects) { item in
                     ProjectCard(
-                        viewModel: ProjectCardViewModel(item: item),
+                        viewModel: makeProjectCardViewModel(item),
                         onOpen: { onOpenProject(item.project) },
                         onDelete: item.canDelete ? { onDeleteProject(item) } : nil
                     )
@@ -58,4 +67,3 @@ private extension WorkspaceBandSectionView {
         }
     }
 }
-

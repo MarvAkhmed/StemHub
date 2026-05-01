@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import FirebaseFirestore
 
 private enum MacOSWindowMetrics {
     static let defaultWidth: CGFloat = 1100
@@ -15,7 +16,6 @@ private enum MacOSWindowMetrics {
 @main
 struct StemHub_macOS_App: App {
     @NSApplicationDelegateAdaptor(StemHubMacOSAppDelegate.self) private var appDelegate
-    
     private let assembler: AppAssembler
     @StateObject private var authenticationViewModel: AuthViewModel
     @StateObject private var socialViewModel: SocialLoginViewModel
@@ -23,9 +23,9 @@ struct StemHub_macOS_App: App {
     
     init() {
         FirebaseRuntimeBootstrap.ensureConfigured()
+        
         let assembler = AppAssembler()
         self.assembler = assembler
-
         let launchViewModels = assembler.makeLaunchViewModels()
         _authenticationViewModel = StateObject(wrappedValue: launchViewModels.auth)
         _socialViewModel = StateObject(wrappedValue: launchViewModels.social)

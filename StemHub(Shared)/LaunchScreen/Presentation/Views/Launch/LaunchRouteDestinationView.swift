@@ -7,20 +7,12 @@
 
 import SwiftUI
 
-struct LaunchRouteDestinationView<
-    SVM: LaunchNavigating,
-    AVM: AuthViewModelProtocol
->: View {
+struct LaunchRouteDestinationView< SVM: LaunchNavigating, AVM: AuthViewModelProtocol>: View {
     let route: LaunchRoute
     let socialViewModel: SVM
     let authenticationViewModel: AVM
 
     var body: some View {
-        content
-    }
-
-    @ViewBuilder
-    private var content: some View {
         switch route {
         case .login:
             LoginScreen(

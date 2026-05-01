@@ -8,6 +8,11 @@
 import Foundation
 import AppKit
 
+enum CreateProjectBandSelection {
+    case existing(Band)
+    case new(name: String, additionalAdminUserIDs: [String])
+}
+
 struct CreateProjectInput {
     let name: String
     let folderURL: URL

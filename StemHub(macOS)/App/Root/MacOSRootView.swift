@@ -19,32 +19,28 @@ struct MacOSRootView<SVM: SocialLoginViewModelProtocol,
     var body: some View {
         content
             .task {
-                await completeSessionCheck()
+                await finishInitialLoading()
             }
     }
     
     @ViewBuilder
     private var content: some View {
-        Group {
-            if isCheckingSession {
-                LoadingView(message: "Checking your session...")
-            } else if let _ = authorizationViewModel.currentUser,
-                      authorizationViewModel.isAuthenticated {
-                MainAppShellView(
-                    authVM: authorizationViewModel,
-                    module: assembler.workspaceModule
-                )
+        if isCheckingSession {
+            LoadingView(message: "Checking your session...")
+        } else if authorizationViewModel.currentUser != nil,
+                  authorizationViewModel.isAuthenticated {
+            
+            assembler.workspaceModule.makeMainAppShellView(authVM: authorizationViewModel)
                 .loadingOverlay(
                     isLoading: authorizationViewModel.isLoading,
                     message: authorizationViewModel.isLoadingMessage
                 )
-            } else {
-                buildLaunchScreen()
-                    .loadingOverlay(
-                        isLoading: authorizationViewModel.isLoading,
-                        message: authorizationViewModel.isLoadingMessage
-                    )
-            }
+        } else {
+            buildLaunchScreen()
+                .loadingOverlay(
+                    isLoading: authorizationViewModel.isLoading,
+                    message: authorizationViewModel.isLoadingMessage
+                )
         }
     }
     
@@ -64,13 +60,12 @@ struct MacOSRootView<SVM: SocialLoginViewModelProtocol,
             )
         }
     }
+    
+    private func finishInitialLoading() async {
+        guard isCheckingSession,
+              !Task.isCancelled else { return }
 
-    private func completeSessionCheck() async {
-        guard isCheckingSession else { return }
-
-        try? await Task.sleep(for: .milliseconds(500))
-
-        guard !Task.isCancelled else { return }
+        await Task.yield()
         isCheckingSession = false
     }
 }

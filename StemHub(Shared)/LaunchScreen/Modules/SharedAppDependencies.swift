@@ -11,10 +11,9 @@ import Foundation
 struct SharedAppDependencies {
     let authService: AuthServiceProtocol
     let authModule: AuthModule
-
+    
     init() {
         FirebaseRuntimeBootstrap.ensureConfigured()
-
         let configurationLoader = BundleFirebaseConfigurationLoader()
         let configurationValidator = BundleGoogleSignInConfigurationValidator(
             configurationLoader: configurationLoader

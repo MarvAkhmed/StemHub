@@ -15,12 +15,12 @@ protocol IOSWorkspaceLoading {
 final class FirestoreIOSWorkspaceRepository: IOSWorkspaceLoading {
     private let db: Firestore
 
-    init(db: Firestore = Firestore.firestore()) {
+    init(db: Firestore) {
         self.db = db
     }
 
     func fetchWorkspace(for userID: String) async throws -> IOSWorkspaceSnapshot {
-        let userDocument = try await db.collection("users").document(userID).getDocument()
+        let userDocument = try await db.collection(FirestoreCollections.users.path).document(userID).getDocument()
         let bandIDs = userDocument.data()?["bandIDs"] as? [String] ?? []
 
         guard !bandIDs.isEmpty else {
@@ -40,7 +40,7 @@ final class FirestoreIOSWorkspaceRepository: IOSWorkspaceLoading {
         var bands: [IOSBandSummary] = []
 
         for chunk in bandIDs.chunked(into: 30) {
-            let snapshot = try await db.collection("bands")
+            let snapshot = try await db.collection(FirestoreCollections.bands.path)
                 .whereField(FieldPath.documentID(), in: chunk)
                 .getDocuments()
 
@@ -54,7 +54,7 @@ final class FirestoreIOSWorkspaceRepository: IOSWorkspaceLoading {
         var projects: [IOSProjectSummary] = []
 
         for chunk in bandIDs.chunked(into: 30) {
-            let snapshot = try await db.collection("projects")
+            let snapshot = try await db.collection(FirestoreCollections.projects.path)
                 .whereField("bandID", in: chunk)
                 .getDocuments()
 
@@ -62,13 +62,5 @@ final class FirestoreIOSWorkspaceRepository: IOSWorkspaceLoading {
         }
 
         return projects.sorted { $0.updatedAt > $1.updatedAt }
-    }
-}
-
-private extension Array {
-    func chunked(into size: Int) -> [[Element]] {
-        stride(from: 0, to: count, by: size).map {
-            Array(self[$0 ..< Swift.min($0 + size, count)])
-        }
     }
 }

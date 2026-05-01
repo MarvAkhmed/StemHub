@@ -12,5 +12,8 @@ extension View {
     func keyboardAdaptive() -> some View {
         self.modifier(KeyboardAdaptive())
     }
-}
 
+    func iosStudioScreenBackground() -> some View {
+        background(IOSStudioBackground())
+    }
+}

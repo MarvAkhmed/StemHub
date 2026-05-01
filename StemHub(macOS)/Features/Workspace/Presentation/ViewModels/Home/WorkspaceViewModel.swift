@@ -33,12 +33,24 @@ final class WorkspaceViewModel: WorkspaceViewModelProtocol {
     private let projectCreation: ProjectCreationServiceProtocol
     private let projectDeletionService: ProjectDeletionServiceProtocol
     private let syncService: ProjectSyncService
-    private let stateStore: ProjectStateStore
-
+    private let workspaceStateService: ProjectWorkspaceStateManaging
+    private let commitWorkflowService: ProjectCommitWorkflowing
+    private let posterImageProvider: ProjectPosterImageProviding
+    private let sectionFilter: WorkspaceSectionFiltering
+    
     @Published private(set) var projects: [Project] = []
     @Published private(set) var bands: [Band] = []
-    @Published private(set) var sections: [WorkspaceBandSection] = []
-    @Published var searchText = ""
+    @Published private(set) var sections: [WorkspaceBandSection] = [] {
+        didSet {
+            rebuildVisibleSections()
+        }
+    }
+    @Published private(set) var visibleSections: [WorkspaceBandSection] = []
+    @Published var searchText = "" {
+        didSet {
+            rebuildVisibleSections()
+        }
+    }
     @Published private var activityState: WorkspaceActivityState = .idle
     @Published var errorMessage: String?
     @Published private var hasLoadedWorkspace = false
@@ -46,27 +58,10 @@ final class WorkspaceViewModel: WorkspaceViewModelProtocol {
     var isLoading: Bool { activityState.isLoading }
     var isCreatingProject: Bool { activityState.isCreatingProject }
     var hasProjects: Bool { !projects.isEmpty }
-    var projectCountLabel: String { "\(projects.count) project\(projects.count == 1 ? "" : "s")" }
-    var bandCountLabel: String { "\(bands.count) band\(bands.count == 1 ? "" : "s")" }
+    var projectCountLabel: String { sectionFilter.projectCountLabel(for: projects.count) }
+    var bandCountLabel: String { sectionFilter.bandCountLabel(for: bands.count) }
     var blockingActivityMessage: String? { activityState.overlayMessage }
     var searchResultsAreEmpty: Bool { hasProjects && visibleSections.isEmpty }
-
-    var visibleSections: [WorkspaceBandSection] {
-        let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !query.isEmpty else { return sections }
-
-        return sections.compactMap { section in
-            let filteredProjects = section.projects.filter { $0.matchesSearch(query) }
-            guard !filteredProjects.isEmpty else { return nil }
-
-            return WorkspaceBandSection(
-                id: section.id,
-                title: section.title,
-                subtitle: "\(filteredProjects.count) project\(filteredProjects.count == 1 ? "" : "s")",
-                projects: filteredProjects
-            )
-        }
-    }
 
     private var currentUserID: String? { authService.currentUser?.id }
 
@@ -76,14 +71,20 @@ final class WorkspaceViewModel: WorkspaceViewModelProtocol {
         projectCreation: ProjectCreationServiceProtocol,
         projectDeletionService: ProjectDeletionServiceProtocol,
         syncService: ProjectSyncService,
-        stateStore: ProjectStateStore
+        workspaceStateService: ProjectWorkspaceStateManaging,
+        commitWorkflowService: ProjectCommitWorkflowing,
+        sectionFilter: WorkspaceSectionFiltering,
+        posterImageProvider: ProjectPosterImageProviding
     ) {
         self.authService = authService
         self.workspaceCatalogService = workspaceCatalogService
         self.projectCreation = projectCreation
         self.projectDeletionService = projectDeletionService
         self.syncService = syncService
-        self.stateStore = stateStore
+        self.workspaceStateService = workspaceStateService
+        self.commitWorkflowService = commitWorkflowService
+        self.posterImageProvider = posterImageProvider
+        self.sectionFilter = sectionFilter
     }
 
     func loadWorkspaceIfNeeded() async {
@@ -110,10 +111,7 @@ final class WorkspaceViewModel: WorkspaceViewModelProtocol {
         }
 
         await runActivity(.creating(message: "Creating project...")) {
-            _ = try await projectCreation.createProject(
-                input,
-                userID: userID,
-                existingProjects: projects
+            _ = try await projectCreation.createProject(input, userID: userID, existingProjects: projects
             )
             try await reloadCatalog(for: userID)
         } onError: { $0.localizedDescription }
@@ -159,15 +157,15 @@ final class WorkspaceViewModel: WorkspaceViewModelProtocol {
             finishWithError("User not logged in")
             return
         }
-
+        
         let branchID = project.currentBranchID
         guard !branchID.isEmpty else {
             finishWithError("No branch selected")
             return
         }
-
+        
         await runActivity(.loading(message: "Committing changes...")) {
-            let commit = try await syncService.createCommit(
+            let commit = try await commitWorkflowService.createCommitDraft(
                 projectID: project.id,
                 branchID: branchID,
                 stagedFiles: [],
@@ -175,14 +173,13 @@ final class WorkspaceViewModel: WorkspaceViewModelProtocol {
                 message: "Auto-commit from workspace"
             )
 
-            _ = try await syncService.pushCommit(
-                LocalCommit(
-                    id: commit.id,
-                    commit: commit,
-                    cachedFolderURL: localCacheFolder(for: project.id),
-                    isPushed: false,
-                    createdAt: Date()
-                ),
+            _ = try await commitWorkflowService.stageCommit(
+                commit,
+                projectID: project.id,
+                branchID: branchID
+            )
+            _ = try await commitWorkflowService.pushAllCommits(
+                projectID: project.id,
                 branchID: branchID
             )
 
@@ -191,7 +188,14 @@ final class WorkspaceViewModel: WorkspaceViewModelProtocol {
     }
 
     func getLocalState(for project: Project) -> ProjectSyncState {
-        stateStore.syncState(for: project.id)
+        workspaceStateService.state(for: project.id)
+    }
+
+    func makeProjectCardViewModel(for item: WorkspaceProjectItem) -> ProjectCardViewModel {
+        ProjectCardViewModel(
+            item: item,
+            posterImageProvider: posterImageProvider
+        )
     }
 
     func clearError() {
@@ -200,12 +204,6 @@ final class WorkspaceViewModel: WorkspaceViewModelProtocol {
 }
 
 private extension WorkspaceViewModel {
-    func localCacheFolder(for projectID: String) -> URL {
-        let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
-        let base = appSupport.appendingPathComponent("StemHub/Commits/\(projectID)", isDirectory: true)
-        try? FileManager.default.createDirectory(at: base, withIntermediateDirectories: true)
-        return base
-    }
 
     func reloadCatalog(for userID: String) async throws {
         let catalog = try await workspaceCatalogService.loadCatalog(for: userID)
@@ -219,6 +217,13 @@ private extension WorkspaceViewModel {
         errorMessage = nil
         hasLoadedWorkspace = true
         activityState = .idle
+    }
+
+    func rebuildVisibleSections() {
+        visibleSections = sectionFilter.visibleSections(
+            from: sections,
+            query: searchText
+        )
     }
 
     func runActivity(

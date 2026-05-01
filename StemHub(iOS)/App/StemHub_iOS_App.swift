@@ -38,19 +38,14 @@ struct StemHub_iOS_App: App {
                         assembler: assembler
                     )
                 } else {
-                    launchView()
+                    IOSLaunchView(
+                        socialViewModel: socialViewModel,
+                        termsViewModel: termsViewModel,
+                        authenticationViewModel: authenticationViewModel
+                    )
                 }
             }
             .preferredColorScheme(.dark)
         }
-    }
-    
-    @ViewBuilder
-    private func launchView() -> some View {
-        IOSLaunchView(
-            socialViewModel: socialViewModel,
-            termsViewModel: termsViewModel,
-            authenticationViewModel: authenticationViewModel
-        )
     }
 }

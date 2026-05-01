@@ -16,10 +16,15 @@ final class MultiStemPlaybackViewModel: NSObject, ObservableObject {
     @Published var playbackRate: Double
     @Published var errorMessage: String?
 
+    private let playbackPreparer: AudioPlaybackPreparing
     private var players: [URL: AVAudioPlayer] = [:]
-    private var securityScopedURLs: Set<URL> = []
+    private var accessSessions: [URL: SecurityScopedURLAccessSession] = [:]
 
-    init(defaultPlaybackRate: Double) {
+    init(
+        playbackPreparer: AudioPlaybackPreparing,
+        defaultPlaybackRate: Double
+    ) {
+        self.playbackPreparer = playbackPreparer
         playbackRate = defaultPlaybackRate
         super.init()
     }
@@ -41,25 +46,18 @@ final class MultiStemPlaybackViewModel: NSObject, ObservableObject {
     }
 
     func togglePlayback(for url: URL) {
-        do {
-            if isPlaying(url) {
-                stop(url)
-            } else {
-                try play(url, restart: true)
+        if isPlaying(url) {
+            stop(url)
+        } else {
+            Task {
+                await playHandlingError(url, restart: true)
             }
-        } catch {
-            errorMessage = error.localizedDescription
         }
     }
 
     func playSelected() {
-        do {
-            stopAll()
-            for url in selectedURLs.sorted(by: { $0.lastPathComponent < $1.lastPathComponent }) {
-                try play(url, restart: true)
-            }
-        } catch {
-            errorMessage = error.localizedDescription
+        Task {
+            await playSelectedHandlingError()
         }
     }
 
@@ -87,16 +85,35 @@ final class MultiStemPlaybackViewModel: NSObject, ObservableObject {
         stopAll()
         players.removeAll()
         selectedURLs.removeAll()
-        for url in securityScopedURLs {
-            url.stopAccessingSecurityScopedResource()
+        for accessSession in accessSessions.values {
+            accessSession.invalidate()
         }
-        securityScopedURLs.removeAll()
+        accessSessions.removeAll()
     }
 }
 
 private extension MultiStemPlaybackViewModel {
-    func play(_ url: URL, restart: Bool) throws {
-        let player = try player(for: url)
+    func playSelectedHandlingError() async {
+        do {
+            stopAll()
+            for url in selectedURLs.sorted(by: { $0.lastPathComponent < $1.lastPathComponent }) {
+                try await play(url, restart: true)
+            }
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+    }
+
+    func playHandlingError(_ url: URL, restart: Bool) async {
+        do {
+            try await play(url, restart: restart)
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+    }
+
+    func play(_ url: URL, restart: Bool) async throws {
+        let player = try await player(for: url)
         if restart {
             player.currentTime = 0
         }
@@ -120,27 +137,27 @@ private extension MultiStemPlaybackViewModel {
         playingURLs.remove(url)
     }
 
-    func player(for url: URL) throws -> AVAudioPlayer {
+    func player(for url: URL) async throws -> AVAudioPlayer {
         if let player = players[url] {
             player.enableRate = true
             player.rate = Float(playbackRate)
             return player
         }
 
-        beginAccessing(url)
-        let player = try AVAudioPlayer(contentsOf: url)
-        player.enableRate = true
-        player.rate = Float(playbackRate)
-        player.delegate = self
-        player.prepareToPlay()
-        players[url] = player
-        return player
-    }
+        let preparedPlayback = try await playbackPreparer.preparePlayback(for: url)
 
-    func beginAccessing(_ url: URL) {
-        guard !securityScopedURLs.contains(url) else { return }
-        if url.startAccessingSecurityScopedResource() {
-            securityScopedURLs.insert(url)
+        do {
+            let player = try AVAudioPlayer(contentsOf: preparedPlayback.playbackURL)
+            player.enableRate = true
+            player.rate = Float(playbackRate)
+            player.delegate = self
+            player.prepareToPlay()
+            players[url] = player
+            accessSessions[url] = preparedPlayback.accessSession
+            return player
+        } catch {
+            preparedPlayback.accessSession.invalidate()
+            throw error
         }
     }
 }

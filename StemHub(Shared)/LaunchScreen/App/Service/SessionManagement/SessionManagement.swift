@@ -14,8 +14,8 @@ protocol AuthenticatedUserProviding: AnyObject {
 
 protocol AuthSessionStateProviding: AuthenticatedUserProviding {
     var isSignedIn: Bool { get }
-    var currentUserPublisher: AnyPublisher<User?, Never> { get }
-    var isSignedInPublisher: AnyPublisher<Bool, Never> { get }
+    var currentUserPublisher: AnyPublisher<User?, AuthError> { get }
+    var isSignedInPublisher: AnyPublisher<Bool, AuthError> { get }
 }
 
 protocol SessionActivating {
@@ -38,18 +38,29 @@ typealias SessionManagement = AuthSessionStateProviding &
 
 final class SessionManager: SessionManagement {
     
+    //MARK: - Publishers
     @Published private(set) var currentUser: User?
     @Published private(set) var isSignedIn = false
     
-    var currentUserPublisher: AnyPublisher<User?, Never> { $currentUser.eraseToAnyPublisher() }
-    var isSignedInPublisher: AnyPublisher<Bool, Never> { $isSignedIn.eraseToAnyPublisher() }
+    var currentUserPublisher: AnyPublisher<User?, AuthError> {
+        $currentUser
+            .setFailureType(to: AuthError.self)
+            .eraseToAnyPublisher()
+    }
     
+    var isSignedInPublisher: AnyPublisher<Bool, AuthError> {
+        $isSignedIn
+            .setFailureType(to: AuthError.self)
+            .eraseToAnyPublisher()
+    }
+    
+    //MARK: - Dependencies
     private let userRepository: AuthUserRepository
     private let userDefaultsManager: UserDefaultsManaging
     private let authStateProvider: AuthStateProviding
-    
     private var listenerHandle: AuthStateListenerHandle?
     
+    //MARK: - Initlizer
     init(
         userRepository: AuthUserRepository,
         userDefaultsManager: UserDefaultsManaging,
@@ -67,6 +78,7 @@ final class SessionManager: SessionManagement {
         }
     }
     
+    //MARK: - public implementaions
     func restoreSession() async throws -> User? {
         if let userId = authStateProvider.currentUserID {
             if let existingUser = try await userRepository.fetchUser(userId: userId) {
@@ -95,6 +107,7 @@ final class SessionManager: SessionManagement {
     
 }
 
+//MARK: - Private Helpers
 private extension SessionManager {
     func setupAuthStateListener() {
         listenerHandle = authStateProvider.addStateListener { [weak self] state in

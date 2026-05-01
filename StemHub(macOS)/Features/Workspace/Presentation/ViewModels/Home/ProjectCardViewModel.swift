@@ -19,19 +19,19 @@ struct ProjectCardViewModel {
     }
 
     let item: WorkspaceProjectItem
+    private let posterImageProvider: ProjectPosterImageProviding
+    
+    init(item: WorkspaceProjectItem, posterImageProvider: ProjectPosterImageProviding) {
+        self.item = item
+        self.posterImageProvider = posterImageProvider
+    }
 
     var project: Project { item.project }
     var name: String { item.project.name }
-
+   
+    
     var projectPosterImage: NSImage? {
-        guard
-            let base64 = item.project.posterBase64,
-            let data = Data(base64Encoded: base64)
-        else {
-            return nil
-        }
-
-        return NSImage(data: data)
+        posterImageProvider.image(from: item.project.posterBase64)
     }
 
     var updatedAtFormatted: String {

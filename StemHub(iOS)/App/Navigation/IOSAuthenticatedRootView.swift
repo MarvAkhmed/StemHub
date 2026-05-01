@@ -12,8 +12,14 @@ struct IOSAuthenticatedRootView: View {
     @StateObject private var inboxViewModel: IOSInboxViewModel
     @StateObject private var profileViewModel: IOSProfileViewModel
     @StateObject private var settingsViewModel: IOSSettingsViewModel
+    
     @State private var selectedSection: IOSAppSection = .workspace
 
+    @State private var workspacePath = NavigationPath()
+    @State private var inboxPath = NavigationPath()
+    @State private var profilePath = NavigationPath()
+    @State private var settingsPath = NavigationPath()
+    
     init(currentUser: User, assembler: IOSAppAssembler) {
         _workspaceViewModel = StateObject(
             wrappedValue: assembler.makeWorkspaceViewModel(currentUser: currentUser)
@@ -31,42 +37,35 @@ struct IOSAuthenticatedRootView: View {
 
     var body: some View {
         TabView(selection: $selectedSection) {
-            NavigationStack {
+            // workspace
+            NavigationStack(path: $workspacePath) {
                 WorkspaceView(viewModel: workspaceViewModel)
             }
-            .tabItem {
-                Label(IOSAppSection.workspace.title, systemImage: IOSAppSection.workspace.systemImage)
-            }
             .tag(IOSAppSection.workspace)
-
-            NavigationStack {
+            .tabItem{Label(IOSAppSection.workspace.title, systemImage: IOSAppSection.workspace.systemImage)}
+            
+            // inbox
+            NavigationStack(path: $inboxPath) {
                 IOSInboxView(viewModel: inboxViewModel)
             }
-            .tabItem {
-                Label(IOSAppSection.inbox.title, systemImage: IOSAppSection.inbox.systemImage)
-            }
-            .badge(inboxViewModel.pendingInvitationCount)
             .tag(IOSAppSection.inbox)
-
-            NavigationStack {
+            .tabItem{Label(IOSAppSection.inbox.title, systemImage: IOSAppSection.inbox.systemImage)}
+            
+            // Profile
+            NavigationStack(path: $profilePath) {
                 IOSProfileView(viewModel: profileViewModel)
             }
-            .tabItem {
-                Label(IOSAppSection.profile.title, systemImage: IOSAppSection.profile.systemImage)
-            }
             .tag(IOSAppSection.profile)
-
-            NavigationStack {
+            .tabItem{Label(IOSAppSection.profile.title, systemImage: IOSAppSection.profile.systemImage)}
+            
+            // settings
+            NavigationStack(path: $settingsPath) {
                 IOSSettingsView(viewModel: settingsViewModel)
             }
-            .tabItem {
-                Label(IOSAppSection.settings.title, systemImage: IOSAppSection.settings.systemImage)
-            }
             .tag(IOSAppSection.settings)
+            .tabItem{Label(IOSAppSection.settings.title, systemImage: IOSAppSection.settings.systemImage)}
         }
-        .tint(Color(red: 0.80, green: 0.59, blue: 0.99))
-        .task {
-            await inboxViewModel.loadIfNeeded()
-        }
+        .tint(IOSStudioPalette.accent)
+        .task {  await inboxViewModel.loadIfNeeded() }
     }
 }

@@ -37,7 +37,7 @@ struct WorkspaceHeroPanel: View {
             }
             .buttonStyle(.borderedProminent)
             .controlSize(.large)
-            .tint(Color(red: 0.80, green: 0.58, blue: 0.99))
+            .tint(StudioPalette.tint)
         }
         .studioGlassPanel(cornerRadius: 30, padding: 24)
     }

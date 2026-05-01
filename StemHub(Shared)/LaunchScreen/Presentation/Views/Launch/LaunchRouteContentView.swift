@@ -8,11 +8,11 @@
 import SwiftUI
 
 struct LaunchRouteContentView<
-    SVM: LaunchRouteStateProviding & LaunchNavigating & SocialSignInDriving,
+    SVM: SocialLoginViewModelProtocol,
     AVM: AuthViewModelProtocol,
     TVM: TermsAndPrivacyLabelViewModelProtocol
 >: View {
-    let socialViewModel: SVM
+    @ObservedObject var socialViewModel: SVM
     let authenticationViewModel: AVM
     let termsViewModel: TVM
 

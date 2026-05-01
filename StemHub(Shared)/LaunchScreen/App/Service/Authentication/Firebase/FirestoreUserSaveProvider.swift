@@ -9,8 +9,13 @@ import Foundation
 import FirebaseFirestore
 
 struct FirestoreUserSaveProvider: UserSaving {
+    let db: Firestore
+    init(db: Firestore) {
+        self.db = db
+    }
+    
     func save(_ user: User) async throws {
-        let db = Firestore.firestore()
-        try db.collection("users").document(user.id).setData(from: user)
+        
+        try db.collection(FirestoreCollections.users.path).document(user.id).setData(from: user)
     }
 }

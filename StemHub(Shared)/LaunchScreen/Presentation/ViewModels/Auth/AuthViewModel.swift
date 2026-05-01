@@ -147,16 +147,25 @@ private extension AuthViewModel {
     func bindWith(authService: AuthServiceProtocol) {
         authService.currentUserPublisher
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] _ in
+            .sink(receiveCompletion: {[weak self] completion in
+                if case .failure(let error) = completion {
+                    self?.showAlert(title: "Error", message: error.localizedDescription)
+                }
+            }, receiveValue: { [weak self] _ in
                 self?.objectWillChange.send()
-            }
+            })
             .store(in: &cancellables)
         
         authService.isSignedInPublisher
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] _ in
+            .sink(receiveCompletion: {[weak self] completion in
+                if case .failure(let error) = completion {
+                    self?.showAlert(title: "Error", message: error.localizedDescription)
+                }
+            }, receiveValue: { [weak self] _ in
                 self?.objectWillChange.send()
-            }
+            })
             .store(in: &cancellables)
     }
+  
 }

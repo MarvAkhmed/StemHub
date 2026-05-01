@@ -10,9 +10,16 @@ import SwiftUI
 struct WorkspaceView: View {
     @ObservedObject var viewModel: WorkspaceViewModel
     let module: WorkspaceModule
-
+    @Binding var selectedProject: Project?
+    
+    init(viewModel: WorkspaceViewModel, module: WorkspaceModule, showNewProjectSheet: Bool = false, selectedProject: Binding<Project?>, pendingDeletionItem: WorkspaceProjectItem? = nil) {
+        self.viewModel = viewModel
+        self.module = module
+        self.showNewProjectSheet = showNewProjectSheet
+        self._selectedProject = selectedProject
+        self.pendingDeletionItem = pendingDeletionItem
+    }
     @State private var showNewProjectSheet = false
-    @State private var selectedProject: Project?
     @State private var pendingDeletionItem: WorkspaceProjectItem?
 
     private let columns = [
@@ -20,7 +27,6 @@ struct WorkspaceView: View {
     ]
 
     var body: some View {
-        NavigationStack {
             ZStack {
                 StudioBackdropView()
 
@@ -31,6 +37,8 @@ struct WorkspaceView: View {
                             bandCountLabel: viewModel.bandCountLabel,
                             onCreateProject: { showNewProjectSheet = true }
                         )
+
+                        WorkspaceSearchBar(text: $viewModel.searchText)
 
                         content
                     }
@@ -54,11 +62,6 @@ struct WorkspaceView: View {
                     makeMIDIEditorViewModel: module.makeMIDIEditorViewModel
                 )
             }
-            .searchable(
-                text: $viewModel.searchText,
-                placement: .toolbar,
-                prompt: "Search projects by name"
-            )
             .task {
                 await viewModel.loadWorkspaceIfNeeded()
             }
@@ -96,7 +99,6 @@ struct WorkspaceView: View {
             } message: {
                 Text(viewModel.errorMessage ?? "")
             }
-        }
     }
 }
 
@@ -116,6 +118,7 @@ private extension WorkspaceView {
                 ForEach(viewModel.visibleSections) { section in
                     WorkspaceBandSectionView(
                         section: section,
+                        makeProjectCardViewModel: viewModel.makeProjectCardViewModel,
                         columns: columns,
                         onOpenProject: { selectedProject = $0 },
                         onDeleteProject: { pendingDeletionItem = $0 }

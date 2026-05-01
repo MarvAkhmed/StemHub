@@ -9,10 +9,14 @@ import FirebaseFirestore
 import Foundation
 
 final class FirestoreBandInvitationRepository: BandInvitationRepository {
-    private let db = Firestore.firestore()
+    private let db: Firestore
+    
+    init(db: Firestore) {
+        self.db = db
+    }
 
     func fetchIncomingInvitations(for userID: String) async throws -> [BandInvitation] {
-        let snapshot = try await db.collection("bandInvitations")
+        let snapshot = try await db.collection(FirestoreCollections.bandInvitations.path)
             .whereField("inviteeUserID", isEqualTo: userID)
             .getDocuments()
 
@@ -22,7 +26,7 @@ final class FirestoreBandInvitationRepository: BandInvitationRepository {
     }
 
     func fetchPendingInvitations(bandID: String) async throws -> [BandInvitation] {
-        let snapshot = try await db.collection("bandInvitations")
+        let snapshot = try await db.collection(FirestoreCollections.bandInvitations.path)
             .whereField("bandID", isEqualTo: bandID)
             .getDocuments()
 
@@ -41,14 +45,14 @@ final class FirestoreBandInvitationRepository: BandInvitationRepository {
     }
 
     func createInvitation(_ invitation: BandInvitation) async throws {
-        try db.collection("bandInvitations").document(invitation.id).setData(from: invitation)
+        try db.collection(FirestoreCollections.bandInvitations.path).document(invitation.id).setData(from: invitation)
     }
 
     func acceptInvitation(_ invitation: BandInvitation) async throws {
         let batch = db.batch()
-        let invitationReference = db.collection("bandInvitations").document(invitation.id)
-        let bandReference = db.collection("bands").document(invitation.bandID)
-        let userReference = db.collection("users").document(invitation.inviteeUserID)
+        let invitationReference = db.collection(FirestoreCollections.bandInvitations.path).document(invitation.id)
+        let bandReference = db.collection(FirestoreCollections.bands.path).document(invitation.bandID)
+        let userReference = db.collection(FirestoreCollections.users.path).document(invitation.inviteeUserID)
 
         batch.updateData([
             "status": BandInvitationStatus.accepted.rawValue,
@@ -65,7 +69,7 @@ final class FirestoreBandInvitationRepository: BandInvitationRepository {
     }
 
     func declineInvitation(_ invitation: BandInvitation) async throws {
-        try await db.collection("bandInvitations")
+        try await db.collection(FirestoreCollections.bandInvitations.path)
             .document(invitation.id)
             .updateData([
                 "status": BandInvitationStatus.declined.rawValue,
