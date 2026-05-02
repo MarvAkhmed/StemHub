@@ -7,6 +7,14 @@
 
 import Foundation
 
+// ── Cached wrapper ────────────────────────────────────────────────────────────
+//
+// A Sendable value type that wraps any FileHashing and transparently caches
+// results in FileProcessingCacheActor<String>.
+//
+// All stored properties are either Sendable protocol existentials or actors,
+// so the struct itself is Sendable without @unchecked.
+
 struct CachedFileHasher: FileHashing {
     private let base: any FileHashing
     private let cache: FileProcessingCacheActor<String>
@@ -23,12 +31,8 @@ struct CachedFileHasher: FileHashing {
         let standardizedURL = url.standardizedFileURL
         let key = try FileProcessingCacheKeyResolver.key(for: standardizedURL)
         let base = base
-
         return try await cache.result(for: key) {
-            Task {
-                try await base.fileHash(for: standardizedURL)
-            }
+            try await base.fileHash(for: standardizedURL)
         }
     }
 }
-

@@ -25,10 +25,7 @@ struct CachedPCMHasher: PCMHashing {
         let base = base
 
         return try await cache.result(for: key) {
-            Task {
-                try await base.pcmHash(for: standardizedURL)
-            }
+            try await base.pcmHash(for: standardizedURL)
         }
     }
 }
-

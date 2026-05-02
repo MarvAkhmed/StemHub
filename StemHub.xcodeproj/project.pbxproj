@@ -27,9 +27,37 @@
 		C5EFCD012F9EF50C00DC67CF /* StemHub_macOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = StemHub_macOS.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		C5EFDFF92FA5ABE900DC67CF /* Exceptions for "Config" folder in "StemHub(iOS)" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				"macOS/StemHub_macOS-Info.plist",
+			);
+			target = C574A87D2F81CF7F00FBA2E7 /* StemHub(iOS) */;
+		};
+		C5EFDFFB2FA5ABF200DC67CF /* Exceptions for "Config" folder in "StemHub_macOS" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				"iOS/StemHub_iOS-Info.plist",
+			);
+			target = C5952E172F90F80500A411F0 /* StemHub_macOS */;
+		};
+		C5EFDFFE2FA5AE0400DC67CF /* Exceptions for "StemHub(iOS)" folder in "StemHub_macOS" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				"Resources/GoogleService-Info-iOS.plist",
+			);
+			target = C5952E172F90F80500A411F0 /* StemHub_macOS */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		C531D2D92F9EED76003F0C81 /* Config */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				C5EFDFF92FA5ABE900DC67CF /* Exceptions for "Config" folder in "StemHub(iOS)" target */,
+				C5EFDFFB2FA5ABF200DC67CF /* Exceptions for "Config" folder in "StemHub_macOS" target */,
+			);
 			path = Config;
 			sourceTree = "<group>";
 		};
@@ -40,6 +68,9 @@
 		};
 		C531D4F42F9EEDC4003F0C81 /* StemHub(iOS) */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				C5EFDFFE2FA5AE0400DC67CF /* Exceptions for "StemHub(iOS)" folder in "StemHub_macOS" target */,
+			);
 			path = "StemHub(iOS)";
 			sourceTree = "<group>";
 		};
@@ -137,7 +168,6 @@
 				C5952E142F90F80500A411F0 /* Sources */,
 				C5952E152F90F80500A411F0 /* Frameworks */,
 				C5952E162F90F80500A411F0 /* Resources */,
-				C5EFDFEC2FA547E500DC67CF /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -226,26 +256,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
-
-/* Begin PBXShellScriptBuildPhase section */
-		C5EFDFEC2FA547E500DC67CF /* ShellScript */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-			);
-			outputFileListPaths = (
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "if [ \"$PLATFORM_NAME\" = \"macosx\" ]; then\n    SOURCE_FILE=\"${PROJECT_DIR}/StemHub(macOS)/Resources/GoogleService-Info-macOS.plist\"\n    DEST_DIR=\"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}\"\n    DEST_LINK=\"${DEST_DIR}/GoogleService-Info.plist\"\n    \n    if [ -f \"$SOURCE_FILE\" ]; then\n        ln -sf \"$SOURCE_FILE\" \"$DEST_LINK\"\n        echo \"Symlinked $SOURCE_FILE -> $DEST_LINK\"\n    else\n        echo \"warning: Source file not found at $SOURCE_FILE\"\n    fi\nfi\n";
-		};
-/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		C574A87A2F81CF7F00FBA2E7 /* Sources */ = {

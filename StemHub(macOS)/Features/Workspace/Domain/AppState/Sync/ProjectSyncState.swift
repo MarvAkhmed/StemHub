@@ -13,7 +13,7 @@ struct ProjectSyncState: Codable, Sendable {
     var lastPulledVersionID: String? // remote HEAD
     var lastCommittedID: String?  // local HEAD
     var currentBranchID: String?
-
+    
     nonisolated init(
         projectID: String,
         localPath: String = "",
@@ -27,25 +27,16 @@ struct ProjectSyncState: Codable, Sendable {
         self.lastCommittedID = lastCommittedID
         self.currentBranchID = currentBranchID
     }
-
+    
     nonisolated static func empty(projectID: String) -> ProjectSyncState {
-        ProjectSyncState(
-            projectID: projectID,
-            localPath: "",
-            lastPulledVersionID: nil,
-            lastCommittedID: nil,
-            currentBranchID: nil
-        )
+        ProjectSyncState(projectID: projectID, localPath: "", lastPulledVersionID: nil,
+                         lastCommittedID: nil, currentBranchID: nil)
     }
 }
 
 extension ProjectSyncState {
     private enum CodingKeys: String, CodingKey {
-        case projectID
-        case localPath
-        case lastPulledVersionID
-        case lastCommittedID
-        case currentBranchID
+        case projectID, localPath, lastPulledVersionID, lastCommittedID, currentBranchID
     }
 
     nonisolated init(from decoder: Decoder) throws {

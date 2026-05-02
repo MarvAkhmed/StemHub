@@ -71,7 +71,7 @@ final class AudioIdentityAnalysisService<Fingerprinter: AudioFingerprinting>: Au
     }
 
     func analyzeAudioFiles(_ urls: [URL]) async throws -> [AnalyzedAudioFile<Fingerprint>] {
-        let uniqueURLs = Self.uniqueStandardizedFileURLs(from: urls)
+        let uniqueURLs = await urls.uniqueStandardizedFileURLs()
 
         return try await withThrowingTaskGroup(
             of: (Int, AnalyzedAudioFile<Fingerprint>).self
@@ -102,20 +102,7 @@ final class AudioIdentityAnalysisService<Fingerprinter: AudioFingerprinting>: Au
         }
     }
 
-    private static func uniqueStandardizedFileURLs(from urls: [URL]) -> [URL] {
-        var seenPaths = Set<String>()
-        var uniqueURLs: [URL] = []
-        uniqueURLs.reserveCapacity(urls.count)
 
-        for url in urls {
-            let standardizedURL = url.standardizedFileURL
-            if seenPaths.insert(standardizedURL.path).inserted {
-                uniqueURLs.append(standardizedURL)
-            }
-        }
-
-        return uniqueURLs
-    }
 }
 
 protocol AudioComparing: Sendable {

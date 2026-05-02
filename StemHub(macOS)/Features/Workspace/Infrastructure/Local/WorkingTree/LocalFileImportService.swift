@@ -88,12 +88,8 @@ private extension DefaultLocalFileImportService {
         try fileManager.copyItem(at: sourceURL, to: temporaryURL)
 
         do {
-            _ = try fileManager.replaceItemAt(
-                destinationURL,
-                withItemAt: temporaryURL,
-                backupItemName: nil,
-                options: []
-            )
+            _ = try fileManager.replaceItemAt(destinationURL, withItemAt: temporaryURL,
+                                              backupItemName: nil, options: [])
         } catch {
             try? fileManager.removeItem(at: temporaryURL)
             throw error

@@ -85,11 +85,8 @@ private extension DefaultLocalCommitSnapshotPreparer {
         return stagedFiles.filter { !$0.isDirectory }
     }
 
-    nonisolated func fileSnapshot(
-        files: [LocalFile],
-        remoteSnapshot: [RemoteFileSnapshot],
-        previousSnapshot: [CommitFileSnapshot]
-    ) -> [CommitFileSnapshot] {
+    nonisolated func fileSnapshot(files: [LocalFile], remoteSnapshot: [RemoteFileSnapshot],
+        previousSnapshot: [CommitFileSnapshot]) -> [CommitFileSnapshot] {
         let remoteFilesByPath = Dictionary(remoteSnapshot.map { ($0.path, $0) }, uniquingKeysWith: { $1 })
         let previousFilesByPath = Dictionary(previousSnapshot.map { ($0.path, $0) }, uniquingKeysWith: { $1 })
         let previousFilesByHash = Dictionary(previousSnapshot.map { ($0.fileHash, $0) }, uniquingKeysWith: { $1 })

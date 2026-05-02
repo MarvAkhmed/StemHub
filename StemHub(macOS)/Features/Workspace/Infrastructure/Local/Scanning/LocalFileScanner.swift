@@ -14,7 +14,6 @@ protocol FileScannerStrategy: Sendable {
 }
 
 struct LocalFileScanner: FileScannerStrategy {
-    
     nonisolated func fileURLs(in folderURL: URL) throws -> [URL] {
         try folderURL.withSecurityScopedAccess {
             try scanAccessibleFolder(folderURL)
@@ -31,7 +30,9 @@ struct LocalFileScanner: FileScannerStrategy {
         let rootPath = folderURL.standardizedFileURL.path
         let filePath = url.standardizedFileURL.path
         
-        guard filePath == rootPath || filePath.hasPrefix(rootPath + "/") else { return nil }
+        guard filePath == rootPath ||
+              filePath.hasPrefix(rootPath + "/")
+        else { return nil }
         
         let path = filePath
             .replacingOccurrences(of: rootPath, with: "")
@@ -84,24 +85,28 @@ private extension LocalFileScanner {
         
         return url
     }
-
+    
     nonisolated func buildFileTree(at url: URL) -> [FileTreeNode] {
         func buildNode(at nodeURL: URL) -> FileTreeNode? {
-            let isDirectory = (try? nodeURL.resourceValues(forKeys: [.isDirectoryKey]))?.isDirectory ?? false
+            let sKeys: Set<URLResourceKey> = [.isDirectoryKey]
+            let keys: [URLResourceKey] =  [.isDirectoryKey]
+            
+            let isDirectory = (try? nodeURL.resourceValues(forKeys: sKeys))?.isDirectory ?? false
+            
             var node = FileTreeNode(url: nodeURL, isDirectory: isDirectory)
-
+            
+            let contentsOfDirectory = try? FileManager.default.contentsOfDirectory(
+                at: nodeURL,
+                includingPropertiesForKeys: keys
+            )
+            
             if isDirectory {
-                let contents = (try? FileManager.default.contentsOfDirectory(
-                    at: nodeURL,
-                    includingPropertiesForKeys: [.isDirectoryKey]
-                )) ?? []
-
+                let contents = (contentsOfDirectory) ?? []
                 node.children = contents.compactMap(buildNode)
             }
-
+            
             return node
         }
-
         return buildNode(at: url)?.children ?? []
     }
 }

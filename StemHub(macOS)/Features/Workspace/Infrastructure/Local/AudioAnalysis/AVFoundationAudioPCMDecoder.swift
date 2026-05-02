@@ -9,7 +9,7 @@ import AVFoundation
 import Foundation
 
 enum AVFoundationAudioPCMDecoder {
-    private static let outputChunkFrameCapacity: AVAudioFrameCount = 4_096
+    nonisolated private static let outputChunkFrameCapacity: AVAudioFrameCount = 4_096
 
     nonisolated static func decodeMonoFloat32Samples(from url: URL, sampleRate: Double,
                                                      maxDuration: TimeInterval? = nil,

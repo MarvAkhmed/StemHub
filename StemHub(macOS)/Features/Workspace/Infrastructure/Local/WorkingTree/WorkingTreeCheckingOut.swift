@@ -62,10 +62,7 @@ private struct WorkingTreeBackup: Sendable {
 }
 
 private extension LocalWorkingTreeCheckoutService {
-    func replaceWorkingTree(
-        with files: [WorkingTreeCheckoutFile],
-        at localRootURL: URL
-    ) async throws {
+    func replaceWorkingTree(with files: [WorkingTreeCheckoutFile], at localRootURL: URL) async throws {
         let tempRootURL = fileManager.temporaryDirectory
             .appendingPathComponent("StemHubCheckout-\(UUID().uuidString)", isDirectory: true)
         let stagedRootURL = tempRootURL.appendingPathComponent("staged", isDirectory: true)
@@ -108,11 +105,8 @@ private extension LocalWorkingTreeCheckoutService {
         }
     }
 
-    func stageFiles(
-        _ files: [WorkingTreeCheckoutFile],
-        localFilesByPath: [String: LocalFile],
-        stagedRootURL: URL
-    ) async throws -> [StagedWorkingTreeFile] {
+    func stageFiles(_ files: [WorkingTreeCheckoutFile], localFilesByPath: [String: LocalFile],
+                    stagedRootURL: URL) async throws -> [StagedWorkingTreeFile] {
         try await withThrowingTaskGroup(of: StagedWorkingTreeFile?.self) { group in
             for file in files {
                 group.addTask { [fileManager, fileTransferStrategy] in
@@ -141,11 +135,8 @@ private extension LocalWorkingTreeCheckoutService {
         }
     }
 
-    func backupExistingItems(
-        paths: Set<String>,
-        from localRootURL: URL,
-        to backupRootURL: URL
-    ) throws -> [WorkingTreeBackup] {
+    func backupExistingItems(paths: Set<String>, from localRootURL: URL,
+                             to backupRootURL: URL) throws -> [WorkingTreeBackup] {
         var backups: [WorkingTreeBackup] = []
 
         do {
@@ -177,11 +168,8 @@ private extension LocalWorkingTreeCheckoutService {
         return backups
     }
 
-    func install(
-        _ stagedFiles: [StagedWorkingTreeFile],
-        in localRootURL: URL,
-        backedUpPaths: Set<String>
-    ) throws {
+    func install(_ stagedFiles: [StagedWorkingTreeFile], in localRootURL: URL,
+                 backedUpPaths: Set<String>) throws {
         var installedPaths: [String] = []
 
         for stagedFile in stagedFiles {
@@ -201,11 +189,8 @@ private extension LocalWorkingTreeCheckoutService {
         }
     }
 
-    func cleanupInstalledFiles(
-        _ paths: [String],
-        in localRootURL: URL,
-        backedUpPaths: Set<String>
-    ) {
+    func cleanupInstalledFiles(_ paths: [String], in localRootURL: URL,
+        backedUpPaths: Set<String>) {
         for path in paths.reversed() where !backedUpPaths.contains(path) {
             let url = localRootURL.appendingPathComponent(path)
             try? fileManager.removeItem(at: url)

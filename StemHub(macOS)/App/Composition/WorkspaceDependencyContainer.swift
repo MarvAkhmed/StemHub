@@ -45,10 +45,9 @@ struct WorkspaceDependencyContainer {
     ) {
         let db = Firestore.firestore()
         
-        let remoteRepositories = RemoteBackendFactory(
-            backendKind: remoteBackendKind,
-            db: db
-        ).makeRemoteRepositories()
+        let remoteRepositories = RemoteBackendFactory(backendKind: remoteBackendKind,
+                                                      db: db)
+            .makeRemoteRepositories()
         
         bandRepository = remoteRepositories.bandRepository
         bandInvitationRepository = FirestoreBandInvitationRepository(db: db)

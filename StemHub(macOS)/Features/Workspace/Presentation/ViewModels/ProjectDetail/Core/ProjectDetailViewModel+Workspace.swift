@@ -82,10 +82,7 @@ extension ProjectDetailViewModel {
         try await refreshComments(forceRefresh: true)
     }
 
-    func applyBranchWorkspace(
-        _ branchWorkspace: BranchWorkspaceState,
-        preserveSelectedVersionID: String? = nil
-    ) {
+    func applyBranchWorkspace(_ branchWorkspace: BranchWorkspaceState, preserveSelectedVersionID: String? = nil) {
         workspace.branches = branchWorkspace.branches
         workspace.currentBranch = branchWorkspace.selectedBranch
         workspace.versionHistory = branchWorkspace.versionHistory

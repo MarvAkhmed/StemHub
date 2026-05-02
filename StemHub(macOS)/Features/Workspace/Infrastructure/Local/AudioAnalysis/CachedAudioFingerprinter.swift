@@ -7,29 +7,31 @@
 
 import Foundation
 
-struct CachedAudioFingerprinter<Base: AudioFingerprinting>: AudioFingerprinting {
-    typealias Fingerprint = Base.Fingerprint
+import Foundation
+
+struct CachedAudioFingerprinter<Base: AudioFingerprinting>: AudioFingerprinting
+    where Base.Fingerprint == BasicAudioFingerprint
+{
+    typealias Fingerprint = BasicAudioFingerprint
 
     private let base: Base
-    private let cache: FileProcessingCacheActor<Fingerprint>
+    private let cache: FileProcessingCacheActor<BasicAudioFingerprint>
 
     init(
         base: Base,
-        cache: FileProcessingCacheActor<Fingerprint> = FileProcessingCacheActor()
+        cache: FileProcessingCacheActor<BasicAudioFingerprint> = FileProcessingCacheActor()
     ) {
         self.base = base
         self.cache = cache
     }
 
-    nonisolated func fingerprint(for url: URL) async throws -> Fingerprint {
+    nonisolated func fingerprint(for url: URL) async throws -> BasicAudioFingerprint {
         let standardizedURL = url.standardizedFileURL
         let key = try FileProcessingCacheKeyResolver.key(for: standardizedURL)
         let base = base
 
         return try await cache.result(for: key) {
-            Task {
-                try await base.fingerprint(for: standardizedURL)
-            }
+            try await base.fingerprint(for: standardizedURL)
         }
     }
 }
