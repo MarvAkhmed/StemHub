@@ -12,7 +12,6 @@ protocol ProjectCreationServiceProtocol {
     func createProject(_ input: CreateProjectInput, userID: String, existingProjects: [Project]) async throws -> Project
 }
 
-
 final class ProjectCreationService: ProjectCreationServiceProtocol {
     
     private let bandRepository: any BandCreationPersisting

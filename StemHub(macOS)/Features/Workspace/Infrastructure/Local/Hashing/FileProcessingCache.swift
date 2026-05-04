@@ -6,7 +6,7 @@
 //
 
 import Foundation
-
+// Cache mutation is actor-isolated; I/O runs off-actor.
 actor FileProcessingCacheActor<Result: Sendable> {
 
     private struct InFlight: Sendable {
@@ -18,16 +18,13 @@ actor FileProcessingCacheActor<Result: Sendable> {
     private var inFlightTasks: [String: InFlight] = [:]
     private var nextInFlightID: UInt64 = 0
 
-    func result(for key: FileProcessingCacheKey, operation: @Sendable @escaping () async throws -> Result ) async throws -> Result {
+    func result(for key: FileProcessingCacheKey,
+                operation: @Sendable @escaping () async throws -> Result ) async throws -> Result {
         let storageKey = key.storageKey
 
-        if let cached = resultsByKey[storageKey] {
-            return cached
-        }
+        if let cached = resultsByKey[storageKey] { return cached }
 
-        if let inFlight = inFlightTasks[storageKey] {
-            return try await inFlight.task.value
-        }
+        if let inFlight = inFlightTasks[storageKey] { return try await inFlight.task.value }
 
         let id = makeInFlightID()
 
@@ -41,9 +38,7 @@ actor FileProcessingCacheActor<Result: Sendable> {
         do {
             let value = try await task.value
 
-            guard inFlightTasks[storageKey]?.id == id else {
-                throw CancellationError()
-            }
+            guard inFlightTasks[storageKey]?.id == id else { throw CancellationError() }
 
             resultsByKey[storageKey] = value
             inFlightTasks[storageKey] = nil

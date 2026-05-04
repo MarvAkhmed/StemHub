@@ -24,7 +24,7 @@ extension Array {
 }
 
 extension Array where Element == URL {
-    func uniqueStandardizedFileURLs() async -> [URL] {
+    nonisolated func uniqueStandardizedFileURLs() -> [URL] {
         var seenPaths = Set<String>()
         var uniqueURLs: [URL] = []
         uniqueURLs.reserveCapacity(count)

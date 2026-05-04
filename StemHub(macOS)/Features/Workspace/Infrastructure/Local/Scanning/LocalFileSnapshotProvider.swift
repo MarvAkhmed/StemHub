@@ -24,20 +24,29 @@ struct LocalFileSnapshotProvider: LocalFileSnapshotProviding {
     }
     
     nonisolated func scan(folderURL: URL) async throws -> [LocalFile] {
-        let fileURLs = try await scanner.fileURLs(in: folderURL)
-            .uniqueStandardizedFileURLs()
-        
-        return try await fileURLs.asyncCompactMap { url in
-            guard let relativePath = scanner.relativePath(for: url, in: folderURL) else { return nil }
-            let values = try url.resourceValues(forKeys: [.fileSizeKey])
-            let hash = try await fileHasher.fileHash(for: url)
+        var files: [LocalFile] = []
+        try await withThrowingTaskGroup(of: LocalFile?.self) { group in
+            for try await url in scanner.fileURLStream(in: folderURL) {
+                group.addTask {
+                    guard let relativePath = scanner.relativePath(for: url, in: folderURL) else { return nil }
+                    let values = try url.resourceValues(forKeys: [.fileSizeKey])
+                    let hash = try await fileHasher.fileHash(for: url)
+                    
+                    return LocalFile(path: relativePath,
+                                     name: url.lastPathComponent,
+                                     fileExtension: url.pathExtension,
+                                     size: Int64(values.fileSize ?? 0),
+                                     hash: hash,
+                                     isDirectory: false)
+                }
+            }
             
-            return LocalFile(path: relativePath,
-                             name: url.lastPathComponent,
-                             fileExtension: url.pathExtension,
-                             size: Int64(values.fileSize ?? 0),
-                             hash: hash,
-                             isDirectory: false)
+            for try await file in group {
+                if let file {
+                    files.append(file)
+                }
+            }
         }
+        return files.sorted { $0.path < $1.path }
     }
 }

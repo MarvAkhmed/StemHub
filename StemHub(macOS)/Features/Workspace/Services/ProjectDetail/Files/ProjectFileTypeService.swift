@@ -39,9 +39,9 @@ extension ProjectFileTypeProviding {
 }
 
 struct DefaultProjectFileTypeProvider: ProjectFileTypeProviding {
-    private let mediaFileDetector: any AudioFileDetecting & MIDIFileDetecting
+    private let mediaFileDetector: any AudioFileProviding & MIDIFileProviding
 
-    init(mediaFileDetector: any AudioFileDetecting & MIDIFileDetecting) {
+    init(mediaFileDetector: any AudioFileProviding & MIDIFileProviding) {
         self.mediaFileDetector = mediaFileDetector
     }
 

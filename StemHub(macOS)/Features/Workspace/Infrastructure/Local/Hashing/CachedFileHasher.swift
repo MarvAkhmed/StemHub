@@ -7,32 +7,45 @@
 
 import Foundation
 
-// ── Cached wrapper ────────────────────────────────────────────────────────────
-//
-// A Sendable value type that wraps any FileHashing and transparently caches
-// results in FileProcessingCacheActor<String>.
-//
-// All stored properties are either Sendable protocol existentials or actors,
-// so the struct itself is Sendable without @unchecked.
-
 struct CachedFileHasher: FileHashing {
     private let base: any FileHashing
-    private let cache: FileProcessingCacheActor<String>
-
+    private let memoryCache: FileProcessingCacheActor<String>
+    private let persistentCache: FileHashCacheStoring?
+    private let maxPersistentEntries: Int
+    
     init(
         base: any FileHashing,
-        cache: FileProcessingCacheActor<String> = FileProcessingCacheActor()
+        memoryCache: FileProcessingCacheActor<String> = FileProcessingCacheActor(),
+        persistentCache: FileHashCacheStoring? = nil,
+        maxPersistentEntries: Int = FileHashCacheConstants.defaultMaxEntries
     ) {
         self.base = base
-        self.cache = cache
+        self.memoryCache = memoryCache
+        self.persistentCache = persistentCache
+        self.maxPersistentEntries = maxPersistentEntries
     }
-
+    
     nonisolated func fileHash(for url: URL) async throws -> String {
         let standardizedURL = url.standardizedFileURL
         let key = try FileProcessingCacheKeyResolver.key(for: standardizedURL)
+        let storageKey = key.storageKey
+        
         let base = base
-        return try await cache.result(for: key) {
-            try await base.fileHash(for: standardizedURL)
+        let persistentCache = persistentCache
+        let maxPersistentEntries = maxPersistentEntries
+        
+        return try await memoryCache.result(for: key) {
+            if let cached = try await persistentCache?.cachedHash(for: storageKey, algorithmVersion: FileHashCacheConstants.algorithmVersion) { return cached }
+            
+            let hash = try await base.fileHash(for: standardizedURL)
+            
+            try await persistentCache?.saveHash(hash, for: storageKey, algorithmVersion: FileHashCacheConstants.algorithmVersion)
+            
+            try await persistentCache?.evictIfNeeded(
+                maxEntries: maxPersistentEntries
+            )
+            
+            return hash
         }
     }
 }

@@ -8,18 +8,14 @@
 import AVFoundation
 import Foundation
 
-protocol AudioPlaybackPreparing {
-    func preparePlayback(for url: URL) async throws -> PreparedAudioPlayback
-}
-
 struct PreparedAudioPlayback {
     let playbackURL: URL
     let duration: Double
     let accessSession: SecurityScopedURLAccessSession
 }
 
-protocol SecurityScopedURLAccessSession: AnyObject {
-    func invalidate()
+protocol AudioPlaybackPreparing {
+    func preparePlayback(for url: URL) async throws -> PreparedAudioPlayback
 }
 
 struct DefaultAudioPlaybackPreparer: AudioPlaybackPreparing {
@@ -50,26 +46,3 @@ struct DefaultAudioPlaybackPreparer: AudioPlaybackPreparing {
     }
 }
 
-private final class DefaultSecurityScopedURLAccessSession: SecurityScopedURLAccessSession {
-    private let url: URL
-    private let didStartAccess: Bool
-    private var isActive = true
-
-    init(url: URL) {
-        self.url = url
-        didStartAccess = url.startAccessingSecurityScopedResource()
-    }
-
-    deinit {
-        invalidate()
-    }
-
-    func invalidate() {
-        guard isActive else { return }
-        isActive = false
-
-        if didStartAccess {
-            url.stopAccessingSecurityScopedResource()
-        }
-    }
-}

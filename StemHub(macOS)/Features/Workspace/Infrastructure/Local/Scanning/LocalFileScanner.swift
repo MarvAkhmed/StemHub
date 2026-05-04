@@ -9,14 +9,43 @@ import Foundation
 
 protocol FileScannerStrategy: Sendable {
     nonisolated func fileURLs(in folderURL: URL) throws -> [URL]
+    nonisolated func fileURLStream(in folderURL: URL) -> AsyncThrowingStream<URL, Error> // use this better for performance
     nonisolated func fileTree(folderURL: URL) throws -> [FileTreeNode]
     nonisolated func relativePath(for url: URL, in folderURL: URL) -> String?
 }
 
 struct LocalFileScanner: FileScannerStrategy {
+    private let ignoredNames: Set<String> = [".git"] //TODO: REMOVE THIS TO CONSTANTS CLASS 
     nonisolated func fileURLs(in folderURL: URL) throws -> [URL] {
+        var files: [URL] = []
         try folderURL.withSecurityScopedAccess {
-            try scanAccessibleFolder(folderURL)
+            try scanAccessibleFolder(folderURL) { fileURL in
+                files.append(fileURL)
+            }
+        }
+        return files
+    }
+    
+    nonisolated func fileURLStream(in folderURL: URL) -> AsyncThrowingStream<URL, Error> {
+        AsyncThrowingStream { continuation in
+            let task = Task {
+                do {
+                    try folderURL.withSecurityScopedAccess {
+                        try scanAccessibleFolder(folderURL) { fileURL in
+                            try Task.checkCancellation()
+                            continuation.yield(fileURL)
+                        }
+                    }
+                    
+                    continuation.finish()
+                } catch {
+                    continuation.finish(throwing: error)
+                }
+            }
+            
+            continuation.onTermination = { _ in
+                task.cancel()
+            }
         }
     }
     
@@ -44,8 +73,7 @@ struct LocalFileScanner: FileScannerStrategy {
 
 // scanner helpers
 private extension LocalFileScanner {
-    nonisolated func scanAccessibleFolder(_ folderURL: URL) throws -> [URL] {
-        var files: [URL] = []
+    nonisolated func scanAccessibleFolder(_ folderURL: URL, onFile: ((URL) throws -> Void)) throws  {
         let enumerator = makeEnumerator(for: folderURL)
         
         while let url = enumerator?.nextObject() as? URL {
@@ -54,10 +82,9 @@ private extension LocalFileScanner {
             else { continue }
             
             if let fileURL = try scannedFileURL(from: url, enumerator: enumerator) {
-                files.append(fileURL)
+                try onFile(fileURL)
             }
         }
-        return files
     }
     
     nonisolated func makeEnumerator(for folderURL: URL) -> FileManager.DirectoryEnumerator? {
@@ -69,7 +96,8 @@ private extension LocalFileScanner {
     }
     
     nonisolated func shouldInclude(url: URL, relativePath: String) -> Bool {
-        !relativePath.isEmpty && !url.lastPathComponent.hasPrefix(".")
+        let parts = relativePath.split(separator: "/").map(String.init)
+        return !relativePath.isEmpty && !parts.contains { ignoredNames.contains($0) }
     }
     
     nonisolated func scannedFileURL(from url: URL, enumerator: FileManager.DirectoryEnumerator?)throws -> URL? {

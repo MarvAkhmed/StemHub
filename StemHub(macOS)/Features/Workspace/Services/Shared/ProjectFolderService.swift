@@ -74,29 +74,36 @@ final class DefaultProjectFolderService: ProjectFolderService, @unchecked Sendab
         return (try? scanner.fileTree(folderURL: folderURL)) ?? []
     }
 
-    nonisolated func musicFiles(for project: Project) throws -> [MusicFile] {
-        guard let folderURL = resolveFolderURL(for: project.id) else { return [] }
+    nonisolated func musicFiles(for project: Project) async throws -> [MusicFile] {
+        guard let folderURL = resolveFolderURL(for: project.id) else {
+            return []
+        }
 
-        return try scanner.fileURLs(in: folderURL)
-            .compactMap {
-                guard let path = scanner.relativePath(for: $0, in: folderURL) else {
-                    return nil
-                }
+        var musicFiles: [MusicFile] = []
 
-                let fileExtension = $0.pathExtension
-
-                return MusicFile(
-                    id: path,
-                    projectID: project.id,
-                    name: $0.lastPathComponent,
-                    fileExtension: fileExtension,
-                    path: path,
-                    capabilities: .playable,
-                    currentVersionID: project.currentVersionID,
-                    availableFormats: [],
-                    createdAt: Date()
-                )
+        for try await fileURL in scanner.fileURLStream(in: folderURL) {
+            guard let path = scanner.relativePath(for: fileURL, in: folderURL) else {
+                continue
             }
+
+            let fileExtension = fileURL.pathExtension
+
+            let musicFile = MusicFile(
+                id: path,
+                projectID: project.id,
+                name: fileURL.lastPathComponent,
+                fileExtension: fileExtension,
+                path: path,
+                capabilities: .playable,
+                currentVersionID: project.currentVersionID,
+                availableFormats: [],
+                createdAt: Date()
+            )
+
+            musicFiles.append(musicFile)
+        }
+
+        return musicFiles.sorted { $0.path < $1.path }
     }
 
     nonisolated func updateFolderReference(projectID: String, folderURL: URL) throws {

@@ -19,10 +19,16 @@
 		C5952E702F90FAA100A411F0 /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = C5952E6F2F90FAA100A411F0 /* FirebaseCore */; };
 		C5952E722F90FBBC00A411F0 /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = C5952E712F90FBBC00A411F0 /* FirebaseStorage */; };
 		C5952E882F90FEF900A411F0 /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = C5952E872F90FEF900A411F0 /* GoogleSignInSwift */; };
+		C5DEE84F2FA839DA00E874B6 /* FileHashCacheEntry+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5DEE84D2FA839DA00E874B6 /* FileHashCacheEntry+CoreDataClass.swift */; };
+		C5DEE8502FA839DA00E874B6 /* FileHashCacheEntry+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5DEE84E2FA839DA00E874B6 /* FileHashCacheEntry+CoreDataProperties.swift */; };
+		C5DEE8512FA839DA00E874B6 /* FileHashCacheEntry+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5DEE84D2FA839DA00E874B6 /* FileHashCacheEntry+CoreDataClass.swift */; };
+		C5DEE8522FA839DA00E874B6 /* FileHashCacheEntry+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5DEE84E2FA839DA00E874B6 /* FileHashCacheEntry+CoreDataProperties.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		C574A9382F81CFB500FBA2E7 /* StemHub.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = StemHub.xcodeproj; sourceTree = "<group>"; };
+		C5DEE84D2FA839DA00E874B6 /* FileHashCacheEntry+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "FileHashCacheEntry+CoreDataClass.swift"; path = "StemHub(macOS)/Features/Workspace/Infrastructure/Local/Hashing/Model/FileHashCacheEntry+CoreDataClass.swift"; sourceTree = "<group>"; };
+		C5DEE84E2FA839DA00E874B6 /* FileHashCacheEntry+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "FileHashCacheEntry+CoreDataProperties.swift"; path = "StemHub(macOS)/Features/Workspace/Infrastructure/Local/Hashing/Model/FileHashCacheEntry+CoreDataProperties.swift"; sourceTree = "<group>"; };
 		C5EFCD002F9EF50C00DC67CF /* StemHub_iOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = StemHub_iOS.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C5EFCD012F9EF50C00DC67CF /* StemHub_macOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = StemHub_macOS.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -39,13 +45,14 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				"iOS/StemHub_iOS-Info.plist",
+				"macOS/StemHub_macOS-Info.plist",
 			);
 			target = C5952E172F90F80500A411F0 /* StemHub_macOS */;
 		};
-		C5EFDFFE2FA5AE0400DC67CF /* Exceptions for "StemHub(iOS)" folder in "StemHub_macOS" target */ = {
+		C5EFE17A2FA7B7E300DC67CF /* Exceptions for "StemHub(macOS)" folder in "StemHub_macOS" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				"Resources/GoogleService-Info-iOS.plist",
+				Features/Workspace/Infrastructure/Local/AudioAnalysis/README.md,
 			);
 			target = C5952E172F90F80500A411F0 /* StemHub_macOS */;
 		};
@@ -68,14 +75,14 @@
 		};
 		C531D4F42F9EEDC4003F0C81 /* StemHub(iOS) */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-				C5EFDFFE2FA5AE0400DC67CF /* Exceptions for "StemHub(iOS)" folder in "StemHub_macOS" target */,
-			);
 			path = "StemHub(iOS)";
 			sourceTree = "<group>";
 		};
 		C531D6362F9EEDD1003F0C81 /* StemHub(macOS) */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				C5EFE17A2FA7B7E300DC67CF /* Exceptions for "StemHub(macOS)" folder in "StemHub_macOS" target */,
+			);
 			path = "StemHub(macOS)";
 			sourceTree = "<group>";
 		};
@@ -114,6 +121,8 @@
 		C574A8752F81CF7F00FBA2E7 = {
 			isa = PBXGroup;
 			children = (
+				C5DEE84D2FA839DA00E874B6 /* FileHashCacheEntry+CoreDataClass.swift */,
+				C5DEE84E2FA839DA00E874B6 /* FileHashCacheEntry+CoreDataProperties.swift */,
 				C531D2D92F9EED76003F0C81 /* Config */,
 				C531D6362F9EEDD1003F0C81 /* StemHub(macOS) */,
 				C531D4F42F9EEDC4003F0C81 /* StemHub(iOS) */,
@@ -262,6 +271,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C5DEE84F2FA839DA00E874B6 /* FileHashCacheEntry+CoreDataClass.swift in Sources */,
+				C5DEE8502FA839DA00E874B6 /* FileHashCacheEntry+CoreDataProperties.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -269,6 +280,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C5DEE8512FA839DA00E874B6 /* FileHashCacheEntry+CoreDataClass.swift in Sources */,
+				C5DEE8522FA839DA00E874B6 /* FileHashCacheEntry+CoreDataProperties.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
